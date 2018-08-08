@@ -237,8 +237,102 @@ void emulate_instruction(struct cpu_state* state){
     uint8_t opcode_bytes = disassemble_opcode(state->memory, state->registers.PC);
     
     switch(*opcode){
-     //NOP
+      //NOP
       case 0x00: break;
+
+      //Data transfer instructions
+      case 0x40: unimplemented_instruction(state); break;
+      case 0x41: state->registers.B = state->registers.C; break;
+      case 0x42: state->registers.B = state->registers.D; break;
+      case 0x43: state->registers.B = state->registers.E; break;
+      case 0x44: state->registers.B = state->registers.H; break;
+      case 0x45: state->registers.B = state->registers.L; break;
+      case 0x46: state->registers.B =
+        get_data_pointed_by(state, state->registers.H, state->registers.L);
+        break;
+      case 0x47: state->registers.B = state->registers.A; break;
+      case 0x48: state->registers.C = state->registers.B; break;
+      case 0x49: unimplemented_instruction(state); break;
+      case 0x4a: state->registers.C = state->registers.D; break;
+      case 0x4b: state->registers.C = state->registers.E; break;
+      case 0x4c: state->registers.C = state->registers.H; break;
+      case 0x4d: state->registers.C = state->registers.L; break;
+      case 0x4e: state->registers.C =
+        get_data_pointed_by(state, state->registers.H, state->registers.L);
+        break;
+      case 0x4f: state->registers.C = state->registers.A; break;
+      case 0x50: state->registers.D = state->registers.B; break;
+      case 0x51: state->registers.D = state->registers.C; break;
+      case 0x52: unimplemented_instruction(state); break;
+      case 0x53: state->registers.D = state->registers.E; break;
+      case 0x54: state->registers.D = state->registers.H; break;
+      case 0x55: state->registers.D = state->registers.L; break;
+      case 0x56: state->registers.D =
+          get_data_pointed_by(state, state->registers.H, state->registers.L);
+          break;
+      case 0x57: state->registers.D = state->registers.A; break;
+      case 0x58: state->registers.E = state->registers.B; break;
+      case 0x59: state->registers.E = state->registers.C; break;
+      case 0x5a: state->registers.E = state->registers.D; break;
+      case 0x5b: unimplemented_instruction(state); break;
+      case 0x5c: state->registers.E = state->registers.H; break;
+      case 0x5d: state->registers.E = state->registers.L; break;
+      case 0x5e: state->registers.E =
+          get_data_pointed_by(state, state->registers.H, state->registers.L);
+          break;
+      case 0x5f: state->registers.E = state->registers.A; break;
+      case 0x60: state->registers.H = state->registers.B; break;
+      case 0x61: state->registers.H = state->registers.C; break;
+      case 0x62: state->registers.H = state->registers.D; break;
+      case 0x63: state->registers.H = state->registers.E; break;
+      case 0x64: unimplemented_instruction(state); break;
+      case 0x65: state->registers.H = state->registers.L; break;
+      case 0x66: state->registers.H =
+          get_data_pointed_by(state, state->registers.H, state->registers.L);
+          break;
+      case 0x67: state->registers.H = state->registers.A; break;
+      case 0x68: state->registers.L = state->registers.B; break;
+      case 0x69: state->registers.L = state->registers.C; break;
+      case 0x6a: state->registers.L = state->registers.D; break;
+      case 0x6b: state->registers.L = state->registers.E; break;
+      case 0x6c: state->registers.L = state->registers.H; break;
+      case 0x6d: unimplemented_instruction(state); break;
+      case 0x6e: state->registers.L =
+          get_data_pointed_by(state, state->registers.H, state->registers.L);
+          break;
+      case 0x6f: state->registers.L = state->registers.A; break;
+      case 0x70: set_data_pointed_by(state, state->registers.H, state->registers.L,
+          state->registers.B);
+        break;
+      case 0x71: set_data_pointed_by(state, state->registers.H, state->registers.L,
+          state->registers.C);
+        break;
+      case 0x72: set_data_pointed_by(state, state->registers.H, state->registers.L,
+          state->registers.D);
+        break;
+      case 0x73: set_data_pointed_by(state, state->registers.H, state->registers.L,
+          state->registers.E);
+        break;
+      case 0x74: set_data_pointed_by(state, state->registers.H, state->registers.L,
+          state->registers.H);
+        break;
+      case 0x75: set_data_pointed_by(state, state->registers.H, state->registers.L,
+          state->registers.L);
+        break;
+      case 0x76: unimplemented_instruction(state); break;
+      case 0x77: set_data_pointed_by(state, state->registers.H, state->registers.L,
+          state->registers.A);
+        break;
+      case 0x78: state->registers.A = state->registers.B; break;
+      case 0x79: state->registers.A = state->registers.C; break;
+      case 0x7a: state->registers.A = state->registers.D;  break;
+      case 0x7b: state->registers.A = state->registers.E;  break;
+      case 0x7c: state->registers.A = state->registers.H; break;
+      case 0x7d: state->registers.A = state->registers.L; break;
+      case 0x7e: state->registers.A =
+          get_data_pointed_by(state, state->registers.H, state->registers.L);
+          break;
+      case 0x7f: unimplemented_instruction(state); break;
     }
 
     state->registers.PC += opcode_bytes;
@@ -249,4 +343,14 @@ void unimplemented_instruction(struct cpu_state* state){
   uint8_t opcode_bytes = disassemble_opcode(state->memory, state->registers.PC);
   printf("Opcode bytes in the instruction : %u\n", opcode_bytes);
   exit(1);
+}
+
+uint8_t get_data_pointed_by(struct cpu_state* state, uint8_t register_high, uint8_t register_low){
+  uint16_t address = append_registers(register_high, register_low);
+  return state->memory[address];
+}
+
+void set_data_pointed_by(struct cpu_state* state, uint8_t register_high, uint8_t register_low, uint8_t data){
+  uint16_t address = append_registers(register_high, register_low);
+  state->memory[address] = data;
 }

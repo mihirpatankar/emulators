@@ -13,6 +13,7 @@ typedef struct cpu_registers{
  uint8_t B;
  uint8_t C;
  uint8_t D;
+ uint8_t E;
  uint8_t H;
  uint8_t L;
  uint16_t SP;
@@ -26,3 +27,4 @@ typedef struct cpu_state{
 
 void set_status_register_flag(struct cpu_state* state, uint8_t mask);
 void clear_status_register_flag(struct cpu_state* state, uint8_t mask);
+uint16_t append_registers(uint8_t registerA, uint8_t registerB);
