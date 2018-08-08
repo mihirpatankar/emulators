@@ -1,4 +1,5 @@
 #include "common.h"
+#include "memory.h"
 
 #define STATUS_REGISTER_MASK_SIGN 0x80
 #define STATUS_REGISTER_MASK_ZERO 0x40
@@ -17,3 +18,11 @@ typedef struct cpu_registers{
  uint16_t SP;
  uint16_t PC;
 }cpu_registers;
+
+typedef struct cpu_state{
+  struct cpu_registers registers;
+  uint8_t* memory;
+}cpu_state;
+
+void set_status_register_flag(struct cpu_state* state, uint8_t mask);
+void clear_status_register_flag(struct cpu_state* state, uint8_t mask);
