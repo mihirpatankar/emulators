@@ -2,6 +2,8 @@
  * 8080 Disassembler 
  * Made by following the Intel 8080 Microcomputer Systems User's Manual
  * Chapter 4
+ *
+ * References in code: [1] begoon/i8080-core for undocumented instructions
  */
 
 #include <stdio.h>
@@ -256,7 +258,9 @@ uint16_t disassemble(uint8_t *buffer, uint16_t pc)
         case 0x37: printf("STC"); break;
 
         // Branch
-        case 0xC3: printf("JMP $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
+        case 0xC3: 
+        case 0xCB: //Undocumented JMP - ref[1]
+                   printf("JMP $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
 
         case 0xC2: printf("JNZ $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
         case 0xCA: printf("JZ $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
@@ -267,22 +271,26 @@ uint16_t disassemble(uint8_t *buffer, uint16_t pc)
         case 0xF2: printf("JP $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
         case 0xFA: printf("JM $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
 
-        case 0xCD: printf("CALL $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
+        case 0xCD: 
+        case 0xDD: //Undocumented CALL - ref[1]
+                   printf("CALL $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
  
         case 0xC4: printf("CNZ $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
         case 0xCC: printf("CZ $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
-        case 0xD4: printf("CC $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
+        case 0xD4: printf("CNC $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
         case 0xDC: printf("CC $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
         case 0xE4: printf("CPO $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
         case 0xEC: printf("CPE $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
         case 0xF4: printf("CP $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
         case 0xFC: printf("CM $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
         
-        case 0xC9: printf("RET"); break;
+        case 0xC9: 
+        case 0xD9: //Undocumented RET - ref[1]
+                   printf("RET"); break;
  
         case 0xC0: printf("RNZ"); break;
         case 0xC8: printf("RZ"); break;
-        case 0xD0: printf("RC"); break;
+        case 0xD0: printf("RNC"); break;
         case 0xD8: printf("RC"); break;
         case 0xE0: printf("RPO"); break;
         case 0xE8: printf("RPE"); break;
@@ -298,6 +306,8 @@ uint16_t disassemble(uint8_t *buffer, uint16_t pc)
         case 0xF7: printf("RST 6"); break;
         case 0xFF: printf("RST 7"); break;
         
+        case 0xE9: printf("PCHL"); break;
+                   
         // Stack, I/O and Machine Control
         case 0xC5: printf("PUSH B"); break;
         case 0xD5: printf("PUSH D"); break;
@@ -317,9 +327,17 @@ uint16_t disassemble(uint8_t *buffer, uint16_t pc)
         case 0xFB: printf("EI"); break;
         case 0xF3: printf("DI"); break;
         case 0x76: printf("HLT"); break;
-        case 0x00: printf("NOP"); break;    
+        case 0x00: 
+        case 0x08: // Undocumented NOP - ref[1]
+        case 0x10: // Undocumented NOP - ref[1]
+        case 0x18: // Undocumented NOP - ref[1]
+        case 0x20: // Undocumented NOP - ref[1]
+        case 0x28: // Undocumented NOP - ref[1]
+        case 0x30: // Undocumented NOP - ref[1]
+        case 0x38: // Undocumented NOP - ref[1]
+                   printf("NOP"); break;    
         default:
-            printf("Error: Unexpected opcode"); bytes = -1; break;    
+            printf("Error: Should never reach here"); bytes = -1; break;    
     }
 
     printf("\n");
