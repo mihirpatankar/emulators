@@ -239,7 +239,111 @@ void emulate_instruction(struct cpu_state* state){
     switch(*opcode){
       //NOP
       case 0x00: break;
+      case 0x01: state->registers.C = opcode[1];
+        state->registers.B = opcode[2];
+        break;
+      case 0x02: set_data_pointed_by(state, state->registers.B,
+          state->registers.C, state->registers.A); break;
+      case 0x03:
+        {
+          uint16_t data = append_registers(state->registers.B, state->registers.C);
+          assign_data_to_registers(&state->registers.B, &state->registers.C, (data+1));
+          break;
+        }
+      case 0x04: unimplemented_instruction(state); break;
+      case 0x05: unimplemented_instruction(state); break;
+      case 0x06: state->registers.B = opcode[1];
+        break;
+      case 0x07: unimplemented_instruction(state); break;
+      case 0x08: unimplemented_instruction(state); break;
+      case 0x09: unimplemented_instruction(state); break;
+      case 0x0a: unimplemented_instruction(state); break;
+      case 0x0b: unimplemented_instruction(state); break;
+      case 0x0c: unimplemented_instruction(state); break;
+      case 0x0d: unimplemented_instruction(state); break;
+      case 0x0e: state->registers.C = opcode[1];
+        break;
+      case 0x0f: unimplemented_instruction(state); break;
+      case 0x10: unimplemented_instruction(state); break;
+      case 0x11: state->registers.E = opcode[1];
+        state->registers.D = opcode[2];
+        break;
+      case 0x12: set_data_pointed_by(state, state->registers.D,
+          state->registers.E, state->registers.A); break;
+      case 0x13: state->registers.E++;
+        if (state->registers.E == 0){
+          state->registers.D++;
+        }
+        break;
+      case 0x14: unimplemented_instruction(state); break;
+      case 0x15: unimplemented_instruction(state); break;
+      case 0x16: unimplemented_instruction(state); break;
+      case 0x17: unimplemented_instruction(state); break;
+      case 0x18: unimplemented_instruction(state); break;
+      case 0x19: unimplemented_instruction(state); break;
+      case 0x1a: unimplemented_instruction(state); break;
+      case 0x1b: unimplemented_instruction(state); break;
+      case 0x1c: unimplemented_instruction(state); break;
+      case 0x1d: unimplemented_instruction(state); break;
+      case 0x1e: unimplemented_instruction(state); break;
+      case 0x1f: unimplemented_instruction(state); break;
 
+      case 0x20: unimplemented_instruction(state); break;
+      case 0x21: state->registers.L = opcode[1];
+        state->registers.H = opcode[2];
+        break;
+      case 0x22: unimplemented_instruction(state); break;
+      case 0x23: state->registers.L++;
+        if (state->registers.L == 0){
+          state->registers.H++;
+        }
+        break;
+      case 0x24: unimplemented_instruction(state); break;
+      case 0x25: unimplemented_instruction(state); break;
+      case 0x26: state->registers.H = opcode[1];
+        break;
+      case 0x27: unimplemented_instruction(state); break;
+      case 0x28: unimplemented_instruction(state); break;
+      case 0x29: unimplemented_instruction(state); break;
+      case 0x2a: unimplemented_instruction(state); break;
+      case 0x2b: unimplemented_instruction(state); break;
+      case 0x2c: unimplemented_instruction(state); break;
+      case 0x2d: unimplemented_instruction(state); break;
+      case 0x2e: unimplemented_instruction(state); break;
+      case 0x2f: unimplemented_instruction(state); break;
+      case 0x30: unimplemented_instruction(state); break;
+      case 0x31: state->registers.SP = append_registers(opcode[2], opcode[1]);
+        break;
+      case 0x32:
+        {
+          uint16_t address = append_registers(opcode[2], opcode[1]);
+          state->memory[address] = state->registers.A;
+          break;
+        }
+      case 0x33: unimplemented_instruction(state); break;
+      case 0x34: unimplemented_instruction(state); break;
+      case 0x35: unimplemented_instruction(state); break;
+      case 0x36:
+        {
+          uint16_t address = append_registers(state->registers.H, state->registers.L);
+          state->memory[address] = opcode[1];
+          break;
+        }
+      case 0x37: unimplemented_instruction(state); break;
+      case 0x38: unimplemented_instruction(state); break;
+      case 0x39: unimplemented_instruction(state); break;
+      case 0x3a:
+        {
+          uint16_t address = append_registers(opcode[2], opcode[1]);
+          state->registers.A = state->memory[address];
+          break;
+        }
+      case 0x3b: unimplemented_instruction(state); break;
+      case 0x3c: unimplemented_instruction(state); break;
+      case 0x3d: unimplemented_instruction(state); break;
+      case 0x3e: state->registers.A = opcode[1];
+        break;
+      case 0x3f: unimplemented_instruction(state); break;
       //Data transfer instructions
       case 0x40: unimplemented_instruction(state); break;
       case 0x41: state->registers.B = state->registers.C; break;
