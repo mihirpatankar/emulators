@@ -1,15 +1,6 @@
 #include "common.h"
 #include "memory.h"
 
-#define BIT_0_MASK 0x01
-#define BIT_1_MASK 0x02
-#define BIT_2_MASK 0x04
-#define BIT_3_MASK 0x08
-#define BIT_4_MASK 0x10
-#define BIT_5_MASK 0x20
-#define BIT_6_MASK 0x40
-#define BIT_7_MASK 0x80
-
 #define MASK_CY 0x01
 #define MASK_UN1 0x02
 #define MASK_P 0x04
@@ -19,11 +10,24 @@
 #define MASK_Z 0x40
 #define MASK_S 0x80
 
-#define HIGH_BYTE_MASK 0xFF00
-#define LOW_BYTE_MASK 0x00FF
-
-#define BYTE 8
-#define WORD 16
+uint8_t parity_table[] = {
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0,
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1,
+};
 
 typedef union register_pair{
   struct {
@@ -45,23 +49,23 @@ typedef struct flag_register{
 
 typedef struct cpu_state{
   flag_register flag;
-  register_pair AF, BC, DE, HL;
-  register_pair SP, PC, PC_LAST;
+  register_pair af, bc, de, hl;
+  register_pair sp, pc, pc_last;
 }cpu_state;
 
-#define A state->AF.byte.high
-#define F state->AF.byte.low
-#define B state->BC.byte.high
-#define C state->BC.byte.low
-#define D state->DE.byte.high
-#define E state->DE.byte.low
-#define H state->HL.byte.high
-#define L state->HL.byte.low
+#define A state->af.byte.high
+#define F state->af.byte.low
+#define B state->bc.byte.high
+#define C state->bc.byte.low
+#define D state->de.byte.high
+#define E state->de.byte.low
+#define H state->hl.byte.high
+#define L state->hl.byte.low
 
-#define AF state->AF.word
-#define BC state->BC.word
-#define DE state->DE.word
-#define HL state->HL.word
+#define AF state->af.word
+#define BC state->bc.word
+#define DE state->de.word
+#define HL state->hl.word
 
 #define CY state->flag.carry
 #define P state->flag.parity
@@ -72,14 +76,14 @@ typedef struct cpu_state{
 #define UN3 state->flag.un3
 #define UN5 state->flag.un5
 
-#define SP state->SP.word
-#define PC state->PC.word
-#define PC_LAST state->PC_LAST.word
+#define SP_HIGH state->sp.byte.high
+#define SP_LOW state->sp.byte.low
+#define PC_HIGH state->pc.byte.high
+#define PC_LOW state->pc_last.byte.low
+#define PC_LAST state->pc_last.word
+#define SP state->sp.word
+#define PC state->pc.word
 
-#define SP_HIGH state->SP.byte.high
-#define SP_LOW state->SP.byte.low
-#define PC_HIGH state->PC.byte.high
-#define PC_LOW state->PC.byte.low
 
 #define SET(flag) (flag=1)
 #define CLR(flag) (flag=0)
@@ -88,8 +92,8 @@ typedef struct cpu_state{
 cpu_state* state;
 
 void cpu_init();
-
-void init_regs(cpu_state* state);
-void init_flags(cpu_state* state);
-void store_flags(cpu_state* state);
-void get_flags(cpu_state* state);
+void init_regs();
+void init_flags();
+void store_flags();
+void get_flags();
+void update_sign_flag(uint8_t reg);
