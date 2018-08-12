@@ -315,6 +315,308 @@ uint8_t emulate_instruction(uint8_t opcode){
     case 0x30:break;
     case 0x38:break;
 
+    case 0x01:            /* lxi b, data16 */
+        cpu_cycles = 10;
+        BC = RD_WORD(PC+1);
+        break;
+
+    case 0x02:            /* stax b */
+        cpu_cycles = 7;
+        WR_BYTE(BC, A);//(BC) --> A
+        break;
+
+    case 0x03:            /* inx b */
+        cpu_cycles = 5;
+        BC++;
+        break;
+
+    case 0x04:            /* inr b */
+        cpu_cycles = 5;
+        increment(B);
+        break;
+
+    case 0x05:            /* dcr b */
+        cpu_cycles = 5;
+        decrement(B);
+        break;
+
+    case 0x06:            /* mvi b, data8 */
+        cpu_cycles = 7;
+        B = RD_BYTE(PC+1);
+        break;
+
+// TODO
+//    case 0x07:            /* rlc */
+//        cpu_cycles = 4;
+//        C_FLAG = ((A & 0x80) != 0);
+//        A = (A << 1) | C_FLAG;
+//        break;
+
+//    case 0x09:            /* dad b */
+//        cpu_cycles = 10;
+//        DAD(BC);
+//        break;
+
+    case 0x0A:            /* ldax b */
+        cpu_cycles = 7;
+        A = RD_BYTE(BC);
+        break;
+
+    case 0x0B:            /* dcx b */
+        cpu_cycles = 5;
+        BC--;
+        break;
+
+    case 0x0C:            /* inr c */
+        cpu_cycles = 5;
+        increment(C);
+        break;
+
+    case 0x0D:            /* dcr c */
+        cpu_cycles = 5;
+        decrement(C);
+        break;
+
+    case 0x0E:            /* mvi c, data8 */
+        cpu_cycles = 7;
+        C = RD_BYTE(PC+1);
+        break;
+
+//    case 0x0F:            /* rrc */
+//        cpu_cycles = 4;
+//        C_FLAG = A & 0x01;
+//        A = (A >> 1) | (C_FLAG << 7);
+//        break;
+
+    case 0x11:            /* lxi d, data16 */
+        cpu_cycles = 10;
+        DE = RD_WORD(PC+1);
+        break;
+
+    case 0x12:            /* stax d */
+        cpu_cycles = 7;
+        WR_BYTE(DE, A);
+        break;
+
+    case 0x13:            /* inx d */
+        cpu_cycles = 5;
+        DE++;
+        break;
+
+    case 0x14:            /* inr d */
+        cpu_cycles = 5;
+        increment(D);
+        break;
+
+    case 0x15:            /* dcr d */
+        cpu_cycles = 5;
+        decrement(D);
+        break;
+
+    case 0x16:            /* mvi d, data8 */
+        cpu_cycles = 7;
+        D = RD_BYTE(PC+1);
+        break;
+
+//    case 0x17:            /* ral */
+//        cpu_cycles = 4;
+//        work8 = (uns8)C_FLAG;
+//        C_FLAG = ((A & 0x80) != 0);
+//        A = (A << 1) | work8;
+//        break;
+
+//    case 0x19:            /* dad d */
+//        cpu_cycles = 10;
+//        DAD(DE);
+//        break;
+
+    case 0x1A:            /* ldax d */
+        cpu_cycles = 7;
+        A = RD_BYTE(DE);
+        break;
+
+    case 0x1B:            /* dcx d */
+        cpu_cycles = 5;
+        DE--;
+        break;
+
+    case 0x1C:            /* inr e */
+        cpu_cycles = 5;
+        increment(E);
+        break;
+
+    case 0x1D:            /* dcr e */
+        cpu_cycles = 5;
+        decrement(E);
+        break;
+
+    case 0x1E:            /* mvi e, data8 */
+        cpu_cycles = 7;
+        E = RD_BYTE(PC+1);
+        break;
+
+//    case 0x1F:             /* rar */
+//        cpu_cycles = 4;
+//        work8 = (uns8)C_FLAG;
+//        C_FLAG = A & 0x01;
+//        A = (A >> 1) | (work8 << 7);
+//        break;
+
+    case 0x21:             /* lxi h, data16 */
+        cpu_cycles = 10;
+        HL = RD_WORD(PC+1);
+        break;
+
+    case 0x22:            /* shld addr */
+        cpu_cycles = 16;
+        WR_WORD(RD_WORD(PC+1), HL);
+        break;
+
+    case 0x23:            /* inx h */
+        cpu_cycles = 5;
+        HL++;
+        break;
+
+    case 0x24:            /* inr h */
+        cpu_cycles = 5;
+        increment(H);
+        break;
+
+    case 0x25:            /* dcr h */
+        cpu_cycles = 5;
+        decrement(H);
+        break;
+
+    case 0x26:            /* mvi h, data8 */
+        cpu_cycles = 7;
+        H = RD_BYTE(PC+1);
+        break;
+
+//    case 0x27:            /* daa */
+//        cpu_cycles = 4;
+//        carry = (uns8)C_FLAG;
+//        add = 0;
+//        if (H_FLAG || (A & 0x0f) > 9) {
+//            add = 0x06;
+//        }
+//        if (C_FLAG || (A >> 4) > 9 || ((A >> 4) >= 9 && (A & 0x0f) > 9)) {
+//            add |= 0x60;
+//            carry = 1;
+//        }
+//        ADD(add);
+//        P_FLAG = PARITY(A);
+//        C_FLAG = carry;
+//        break;
+
+//    case 0x29:            /* dad hl */
+//        cpu_cycles = 10;
+//        DAD(HL);
+//        break;
+
+    case 0x2A:            /* ldhl addr */
+        cpu_cycles = 16;
+        HL = RD_WORD(RD_WORD(PC+1));
+        break;
+
+    case 0x2B:            /* dcx h */
+        cpu_cycles = 5;
+        HL--;
+        break;
+
+    case 0x2C:            /* inr l */
+        cpu_cycles = 5;
+        increment(L);
+        break;
+
+    case 0x2D:            /* dcr l */
+        cpu_cycles = 5;
+        decrement(L);
+        break;
+
+    case 0x2E:            /* mvi l, data8 */
+        cpu_cycles = 7;
+        L = RD_BYTE(PC+1);
+        break;
+
+    case 0x2F:            /* cma */
+        cpu_cycles = 4;
+        A ^= 0xFF;
+        break;
+
+    case 0x31:            /* lxi sp, data16 */
+        cpu_cycles = 10;
+        SP = RD_WORD(PC+1);
+        break;
+
+    case 0x32:            /* sta addr */
+        cpu_cycles = 13;
+        WR_BYTE(RD_WORD(PC+1), A);
+        break;
+
+    case 0x33:            /* inx sp */
+        cpu_cycles = 5;
+        SP++;
+        break;
+
+//    case 0x34:            /* inr m */
+//        cpu_cycles = 10;
+//        work8 = RD_BYTE(HL);
+//        INR(work8);
+//        WR_BYTE(HL, work8);
+//        break;
+//
+//    case 0x35:            /* dcr m */
+//        cpu_cycles = 10;
+//        work8 = RD_BYTE(HL);
+//        DCR(work8);
+//        WR_BYTE(HL, work8);
+//        break;
+
+    case 0x36:            /* mvi m, data8 */
+        cpu_cycles = 10;
+        WR_BYTE(HL, RD_BYTE(PC+1));
+        break;
+
+    case 0x37:            /* stc */
+        cpu_cycles = 4;
+        SET(CY);
+        break;
+
+    case 0x39:            /* dad sp */
+        cpu_cycles = 10;
+        DAD(SP);
+        break;
+
+    case 0x3A:            /* lda addr */
+        cpu_cycles = 13;
+        A = RD_BYTE(RD_WORD(PC+1));
+        break;
+
+    case 0x3B:            /* dcx sp */
+        cpu_cycles = 5;
+        SP--;
+        break;
+
+    case 0x3C:            /* inr a */
+        cpu_cycles = 5;
+        increment(A);
+        break;
+
+    case 0x3D:            /* dcr a */
+        cpu_cycles = 5;
+        decrement(A);
+        break;
+
+    case 0x3E:            /* mvi a, data8 */
+        cpu_cycles = 7;
+        A = RD_BYTE(PC+1);
+        break;
+
+    case 0x3F:            /* cmc */
+        cpu_cycles = 4;
+        TGL(CY);
+        break;
+
     case 0x40:            /* mov b, b */
         cpu_cycles = 4;
         break;
