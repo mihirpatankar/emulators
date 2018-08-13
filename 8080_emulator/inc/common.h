@@ -1,4 +1,6 @@
-#pragma once
+#ifndef _COMMON_H
+#define _COMMON_H
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -18,3 +20,5 @@
 
 #define BYTE 8
 #define WORD 16
+
+#endif //_COMMON_H

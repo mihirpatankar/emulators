@@ -26,3 +26,20 @@ void memory_write_byte(uint16_t addr, uint16_t byte){
   memory[addr] = byte;
 }
 
+void read_rom_into_memory(char* file_name){
+  file_pointer = fopen(file_name, "rb");
+  if(file_pointer == NULL) {
+      printf("file open error\n");
+      return;
+  }
+
+  fseek(file_pointer, 0L, SEEK_END);
+  file_size = ftell(file_pointer);
+  fseek(file_pointer, 0L, SEEK_SET);
+
+  code_buffer = (uint8_t *) malloc(file_size);
+
+  fread(code_buffer, file_size, 1, file_pointer);
+  fclose(file_pointer);
+}
+

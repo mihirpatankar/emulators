@@ -1,19 +1,21 @@
 #include "disassembler.h"
+#include "cpu.h"
+#include "memory.h"
 
 void increment(uint8_t reg){
   ++reg;
-  S = (reg & BIT_7_MASK) != 0;
-  Z = (reg == 0);
+  S = update_sign_flag(reg);
+  Z = update_zero_flag(reg);
   AC = (reg & 0x0f) == 0;
-  P = parity_table[reg];
+  P = update_parity_flag(reg);
 }
 
 void decrement(uint8_t reg){
   --reg;
-  S = (reg & BIT_7_MASK) != 0;
-  Z = (reg == 0);
+  S = update_sign_flag(reg);
+  Z = update_zero_flag(reg);
   AC = (reg & 0x0f) == 0x0f;
-  P = parity_table[reg];
+  P = update_parity_flag(reg);
 
 }
 
@@ -295,6 +297,7 @@ uint8_t disassemble_opcode(uint8_t* code_buffer, uint16_t pc){
     //never reach here
     default : opcode_bytes = -1;
   }
+  printf("\n");
 
   return opcode_bytes;
 }
@@ -582,10 +585,10 @@ uint8_t emulate_instruction(uint8_t opcode){
         SET(CY);
         break;
 
-    case 0x39:            /* dad sp */
-        cpu_cycles = 10;
-        DAD(SP);
-        break;
+//    case 0x39:            /* dad sp */
+//        cpu_cycles = 10;
+//        DAD(SP);
+//        break;
 
     case 0x3A:            /* lda addr */
         cpu_cycles = 13;
@@ -943,3 +946,8 @@ void unimplemented_instruction(uint8_t opcode){
   exit(1);
 }
 
+void dummy_execute(){
+  uint16_t pc = 0;
+  while(pc < file_size)
+      pc += disassemble_opcode(code_buffer, pc);
+}
