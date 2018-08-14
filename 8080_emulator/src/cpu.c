@@ -23,6 +23,7 @@ void UnimplementedInstruction(void);
  */
 int i8080_run_insn(void) {
     uint8_t opcode = read_byte(PC++);
+    CYCLES += opcode_cycles[opcode];
     switch(opcode)
     {
         // Data Transfer
@@ -130,7 +131,108 @@ int i8080_run_insn(void) {
 
         case 0xEB: DE = DE ^ HL; HL = DE ^ HL; DE = DE ^ HL; /* XOR swap */ break;
 
+        // Arithmetic
+        case 0x80: ADD(B, 0); break;
+        case 0x81: ADD(C, 0); break;
+        case 0x82: ADD(D, 0); break;
+        case 0x83: ADD(E, 0); break;
+        case 0x84: ADD(H, 0); break;
+        case 0x85: ADD(L, 0); break;
+        case 0x86: temp_data_reg = read_byte(HL);
+                   ADD(temp_data_reg, 0); 
+                   break;
+        case 0x87: ADD(A, 0); break;
+        case 0xC6: temp_data_reg = read_byte(PC++);
+                   ADD(temp_data_reg, 0); break;
 
+        case 0x88: ADD(B, 1); break;
+        case 0x89: ADD(C, 1); break;
+        case 0x8A: ADD(D, 1); break;
+        case 0x8B: ADD(E, 1); break;
+        case 0x8C: ADD(H, 1); break;
+        case 0x8D: ADD(L, 1); break;
+        case 0x8E: temp_data_reg = read_byte(HL);
+                   ADD(temp_data_reg, 1); break;
+        case 0x8F: ADD(A, 1); break;
+        case 0xCE: temp_data_reg = read_byte(PC++);
+                   ADD(temp_data_reg, 1); break;
+                   
+        case 0x90: SUB(B, 0); break;
+        case 0x91: SUB(C, 0); break;
+        case 0x92: SUB(D, 0); break;
+        case 0x93: SUB(E ,0); break;
+        case 0x94: SUB(H, 0); break;
+        case 0x95: SUB(L, 0); break;
+        case 0x96: temp_data_reg = read_byte(HL);
+                   SUB(temp_data_reg, 0); break;
+        case 0x97: SUB(A, 0); break;
+        case 0xD6: temp_data_reg = read_byte(PC++);
+                   SUB(temp_data_reg, 0); break;
+
+        case 0x98: SUB(B, 1); break;
+        case 0x99: SUB(C, 1); break;
+        case 0x9A: SUB(D, 1); break;
+        case 0x9B: SUB(E, 1); break;
+        case 0x9C: SUB(H, 1); break;
+        case 0x9D: SUB(L, 1); break;
+        case 0x9E: temp_data_reg = read_byte(HL);
+                   SUB(temp_data_reg, 1); break;
+        case 0x9F: SUB(A, 1); break;
+        
+        case 0xDE: temp_data_reg = read_byte(PC++);
+                   SUB(temp_data_reg, 0); break;
+
+        case 0x04: INR(B); break;
+        case 0x0C: INR(C); break;
+        case 0x14: INR(D); break;
+        case 0x1C: INR(E); break;
+        case 0x24: INR(H); break;
+        case 0x2C: INR(L); break;
+        case 0x34: temp_data_reg = read_byte(HL);
+                   INR(temp_data_reg);
+                   write_byte(HL, temp_data_reg); break;
+        case 0x3C: INR(A); break;
+
+        case 0x05: DCR(B); break;
+        case 0x0D: DCR(C); break;
+        case 0x15: DCR(D); break;
+        case 0x1D: DCR(E); break;
+        case 0x25: DCR(H); break;
+        case 0x2D: DCR(L); break;
+        case 0x35: temp_data_reg = read_byte(HL);
+                   DCR(temp_data_reg);
+                   write_byte(HL, temp_data_reg); break;
+        case 0x3D: DCR(A); break;
+
+        case 0x03: BC++; break;
+        case 0x13: DE++; break;
+        case 0x23: HL++; break;
+        case 0x33: SP++; break;
+                   
+        case 0x0B: BC--; break;
+        case 0x1B: DE--; break;
+        case 0x2B: HL--; break;
+        case 0x3B: SP--; break;
+                   
+        case 0x09: DAD(BC); break;
+        case 0x19: DAD(DE); break;
+        case 0x29: DAD(HL); break;
+        case 0x39: DAD(SP); break;
+                   
+        case 0x27: temp_data_reg  = 0x00;
+                   temp_carry = C_FLAG;
+                   ls_nibble = (A & 0xF); 
+                   ms_nibble = (A>>4) & 0xF;
+                   if(A_FLAG || ls_nibble > 9) {
+                       temp_data_reg = 0x06;
+                   }
+                   if(C_FLAG || (ls_nibble > 9 && ms_nibble >= 9) || ms_nibble > 9) {
+                       temp_data_reg |= 0x60;
+                       temp_carry = 1;         
+                   }
+                   ADD(temp_data_reg, 0);
+                   P_FLAG = parity[A];
+                   C_FLAG = temp_carry; break;
 
 
 
@@ -140,7 +242,7 @@ int i8080_run_insn(void) {
         case 0x00:
         default: UnimplementedInstruction(); break;   
     }
-    return 0; 
+    return opcode_cycles[opcode]; 
 }
 
 

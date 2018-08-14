@@ -34,6 +34,7 @@ typedef struct {
  * The 8080 can be defined by these attributes
  */
 typedef struct {
+    uint32_t cycle_count;
     register_pair psw, bc, de, hl;
     register_pair sp, pc;
     condition_reg c;
@@ -60,6 +61,7 @@ typedef struct {
 #define HPC     cpu.pc.b.h
 #define LPC     cpu.pc.b.l
 #define IFF     cpu.iff
+#define CYCLES  cpu.cycle_count
 
 #define C_FLAG  FLAGS.carry_flag
 #define UN1     FLAGS.undef_bit1
@@ -69,6 +71,147 @@ typedef struct {
 #define UN5     FLAGS.undef_bit5
 #define Z_FLAG  FLAGS.zero_flag
 #define S_FLAG  FLAGS.sign_flag
+
+/*
+ * Opcode cycles
+ */
+static uint8_t opcode_cycles[] = {
+    4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4, 
+    4,  10, 7,  5,  5,  5,  7,  4,  4,  10, 7,  5,  5,  5,  7,  4,  
+    4,  10, 16, 5,  5,  5,  7,  4,  4,  10, 16, 5,  5,  5,  7,  4,  
+    4,  10, 13, 5,  10, 10, 10, 4,  4,  10, 13, 5,  5,  5,  7,  4,  
+    5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,  
+    5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,  
+    5,  5,  5,  5,  5,  5,  7,  5,  5,  5,  5,  5,  5,  5,  7,  5,  
+    7,  7,  7,  7,  7,  7,  7,  7,  5,  5,  5,  5,  5,  5,  7,  5,  
+    4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,  
+    4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,  
+    4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,  
+    4,  4,  4,  4,  4,  4,  7,  4,  4,  4,  4,  4,  4,  4,  7,  4,  
+    5,  10, 10, 10, 11, 11, 7,  11, 5,  10, 10, 10, 11, 11, 7,  11, 
+    5,  10, 10, 10, 11, 11, 7,  11, 5,  10, 10, 10, 11, 11, 7,  11, 
+    5,  10, 10, 18, 11, 11, 7,  11, 5,  5,  10, 5,  11, 11, 7,  11, 
+    5,  10, 10, 4,  11, 11, 7,  11, 5,  5,  10, 4,  11, 11, 7,  11 
+};
+
+
+/*
+ * Parity of all 8-bit values.
+ * Having a static table is better than wasting cycles at run-time.
+ */
+static uint8_t parity[] = {
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, /*  0-15    */
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, /*  16-31   */
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, /*  32-47   */
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, /*  48-63   */
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, /*  64-79   */
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, /*  80-95   */
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, /*  96-111  */
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, /*  112-127 */
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, /*  128-143 */    
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, /*  144-159 */
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, /*  160-175 */
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, /*  176-191 */
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, /*  192-207 */
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, /*  208-223 */
+    0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 1, 0, /*  224-239 */
+    1, 0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 0, 0, 1, /*  240-255 */
+};
+
+/* Aux Carry Truth table for addition
+ *  |   Op1 |   Op2 |   Sum |   ACy | 
+ *  |-------|-------|-------|-------|
+ *  |   0   |   0   |   0   |   0   |
+ *  |   0   |   0   |   1   |   0   |
+ *  |   0   |   1   |   0   |   1   |
+ *  |   0   |   1   |   1   |   0   |
+ *  |   1   |   0   |   0   |   1   |
+ *  |   1   |   0   |   1   |   0   |
+ *  |   1   |   1   |   0   |   1   |
+ *  |   1   |   1   |   1   |   1   |
+ */
+static uint8_t aux_carry_add[] = {0, 0, 1, 0, 1, 0, 1, 1};
+
+/* Aux Carry Truth table for subtration
+ *  |   Op1 |   Op2 |   Sum |   ACy | 
+ *  |-------|-------|-------|-------|
+ *  |   0   |   0   |   0   |   0   |
+ *  |   0   |   0   |   1   |   1   |
+ *  |   0   |   1   |   0   |   1   |
+ *  |   0   |   1   |   1   |   1   |
+ *  |   1   |   0   |   0   |   0   |
+ *  |   1   |   0   |   1   |   0   |
+ *  |   1   |   1   |   0   |   0   |
+ *  |   1   |   1   |   1   |   1   |
+ */
+static uint8_t aux_carry_subtract[] = {0, 1, 1, 1, 0, 0, 0, 1};
+
+
+/*
+ * Working registers for temporary calculations
+ */
+static uint32_t temp32_reg = 0;
+static uint16_t temp16_reg = 0; 
+static uint8_t  temp8_reg = 0;
+static uint8_t  temp_data_reg = 0;
+
+/*
+ * Need the following for DAA
+ */
+static uint8_t  ls_nibble, ms_nibble, temp_carry;
+
+#define ADD(v, c)                                   \
+    do {                                            \
+        temp16_reg = (uint16_t) A + (v) + (c & C_FLAG);  \
+        temp8_reg = ((A & 0x8) >> 1)                \
+                    | ((v & 0x8) >> 2)              \
+                    | ((temp16_reg & 0x8) >> 3);    \
+        A = temp16_reg & 0xFF;                      \
+        C_FLAG = ((temp16_reg & 0x100) >> 8);       \
+        P_FLAG = parity[A];                         \
+        A_FLAG = aux_carry_add[temp8_reg];          \
+        Z_FLAG = (A == 0);                          \
+        S_FLAG = ((A & 0x80) != 0);                 \
+    } while(0)                                      \
+
+#define SUB(v, c)                                   \
+    do {                                            \
+        temp16_reg = (uint16_t) A - (v) - (c & C_FLAG);  \
+        temp8_reg = ((A & 0x8) >> 1)                \
+                    | ((v & 0x8) >> 2)              \
+                    | ((temp16_reg & 0x8) >> 3);    \
+        A = temp16_reg & 0xFF;                      \
+        C_FLAG = ((temp16_reg & 0x100) >> 8);       \
+        P_FLAG = parity[A];                         \
+        A_FLAG = !aux_carry_subtract[temp8_reg];    \
+        Z_FLAG = (A == 0);                          \
+        S_FLAG = ((A & 0x80) != 0);                 \
+    } while(0)                                      \
+
+#define INR(reg)                                    \
+    do {                                            \
+        ++(reg);                                    \
+        P_FLAG = parity[reg];                       \
+        A_FLAG = ((reg & 0xF) == 0x0);              \
+        Z_FLAG = (reg == 0);                        \
+        S_FLAG = ((reg & 0x80) != 0);               \
+    } while(0)                                      \
+
+#define DCR(reg)                                    \
+    do {                                            \
+        --(reg);                                    \
+        P_FLAG = parity[reg];                       \
+        A_FLAG = ((reg & 0xF) != 0xF);              \
+        Z_FLAG = (reg == 0);                        \
+        S_FLAG = ((reg & 0x80) != 0);               \
+    } while(0)                                      \
+
+#define DAD(rp)                                     \
+    do {                                            \
+        temp32_reg = (uint32_t)HL + (rp);           \
+        HL = temp32_reg & 0xFFFF;                   \
+        C_FLAG = ((temp32_reg &0x10000) >> 16);     \
+    } while(0)
 
 /*
  * Initialize the CPU for operation. This involves setting the PC to the value
