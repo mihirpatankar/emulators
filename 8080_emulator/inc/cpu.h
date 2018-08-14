@@ -12,6 +12,8 @@
 #define MASK_Z 0x40
 #define MASK_S 0x80
 
+#define CARRY_CHECK_MASK 0x0100
+
 extern uint8_t parity_table[];
 
 typedef union register_pair{
@@ -72,7 +74,7 @@ typedef struct cpu_state{
 
 #define SET(flag) (flag=1)
 #define CLR(flag) (flag=0)
-#define TGL(flag) (flag=!flag);
+#define TGL(flag) (flag=!flag)
 
 cpu_state* state;
 
@@ -84,4 +86,5 @@ void get_flags();
 uint8_t update_sign_flag(uint8_t reg);
 uint8_t update_parity_flag(uint8_t reg);
 uint8_t update_zero_flag(uint8_t reg);
+uint8_t update_carry_flag(uint16_t reg);
 #endif //_CPU_H

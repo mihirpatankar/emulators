@@ -5,6 +5,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 #define BIT_0_MASK 0x01
 #define BIT_1_MASK 0x02

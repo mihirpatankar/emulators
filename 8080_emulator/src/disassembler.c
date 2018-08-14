@@ -6,7 +6,8 @@ void increment(uint8_t reg){
   ++reg;
   S = update_sign_flag(reg);
   Z = update_zero_flag(reg);
-  AC = (reg & 0x0f) == 0;
+  //  TODO
+  //  update AC
   P = update_parity_flag(reg);
 }
 
@@ -14,22 +15,178 @@ void decrement(uint8_t reg){
   --reg;
   S = update_sign_flag(reg);
   Z = update_zero_flag(reg);
-  AC = (reg & 0x0f) == 0x0f;
+  //  TODO
+  //  update AC
   P = update_parity_flag(reg);
+}
+
+void add(uint8_t reg){
+  uint16_t result = (uint16_t)A + reg;
+  A = result & LOW_BYTE_MASK;
+  S = update_sign_flag(A);
+  Z = update_zero_flag(A);
+  //  TODO
+  //  update AC
+  P = update_parity_flag(A);
+  CY = update_carry_flag(result);
+}
+
+void add_with_carry(uint8_t reg){
+  uint16_t result = (uint16_t)A + reg + CY;
+  A = result & LOW_BYTE_MASK;
+  S = update_sign_flag(A);
+  Z = update_zero_flag(A);
+  //  TODO
+  //  update AC
+  P = update_parity_flag(A);
+  CY = update_carry_flag(result);
+}
+
+void subtract(uint8_t reg){
+  uint16_t result = (uint16_t)A - reg;
+  A = result & LOW_BYTE_MASK;
+  S = update_sign_flag(A);
+  Z = update_zero_flag(A);
+  //  TODO
+  //  update AC
+  P = update_parity_flag(A);
+  CY = update_carry_flag(result);
+}
+
+void subtract_with_borrow(uint8_t reg){
+  uint16_t result = (uint16_t)A - reg - CY;
+  A = result & LOW_BYTE_MASK;
+  S = update_sign_flag(A);
+  Z = update_zero_flag(A);
+  //  TODO
+  //  update AC
+  P = update_parity_flag(A);
+  CY = update_carry_flag(result);
+}
+
+void compare(uint8_t reg){
+  uint16_t result = (uint16_t)A - reg;
+  //  TODO
+  //  update AC
+  uint8_t temp = result & LOW_BYTE_MASK;
+  S = update_sign_flag(temp);
+  Z = update_zero_flag(temp);
+  P = update_parity_flag(temp);
+  CY = update_carry_flag(result);
 
 }
 
-uint8_t disassemble_opcode(uint8_t* code_buffer, uint16_t pc){
-  uint8_t opcode_bytes = 1;
-  
+void logical_and(uint8_t reg){
+  A &= reg;
+  S = update_sign_flag(A);
+  Z = update_zero_flag(A);
+  P = update_parity_flag(A);
+  CLR(CY);
+}
+
+void logical_or(uint8_t reg){
+  A |= reg;
+  S = update_sign_flag(A);
+  Z = update_zero_flag(A);
+  P = update_parity_flag(A);
+  CLR(CY);
+}
+
+void logical_xor(uint8_t reg){
+  A ^= reg;
+  S = update_sign_flag(A);
+  Z = update_zero_flag(A);
+  //  TODO
+  //  update AC
+  P = update_parity_flag(A);
+  CLR(CY);
+}
+
+void push(uint16_t reg){
+  SP-=2;
+  WR_WORD(SP, reg);
+}
+
+void pop(uint16_t reg){
+  reg = RD_WORD(SP);
+  SP+=2;
+}
+
+void call(){
+  push(PC+3);
+  PC = RD_WORD(PC+1);
+}
+
+uint8_t get_opcode_bytes(uint8_t opcode){
+  uint8_t opcode_bytes = 0;
+  if(opcode < OPCODE_MIN || opcode > OPCODE_MAX){
+    printf("Error opcode : %u",opcode);
+    return opcode_bytes;
+  }
+  switch(opcode){
+    case 0x01: opcode_bytes=3; break;
+    case 0x06: opcode_bytes=2; break;
+    case 0x0e: opcode_bytes = 2;  break;
+    case 0x11: opcode_bytes=3; break;
+    case 0x16: opcode_bytes=2; break;
+    case 0x1e: opcode_bytes = 2; break;
+    case 0x21: opcode_bytes=3; break;
+    case 0x22: opcode_bytes=3; break;
+    case 0x26: opcode_bytes=2; break;
+    case 0x2a: opcode_bytes=3; break;
+    case 0x2e: opcode_bytes = 2; break;
+    case 0x31: opcode_bytes=3; break;
+    case 0x32: opcode_bytes=3; break;
+    case 0x36: opcode_bytes=2; break;
+    case 0x3a: opcode_bytes=3; break;
+    case 0x3e: opcode_bytes = 2; break;
+    case 0xc2: opcode_bytes = 3; break;
+    case 0xc3: opcode_bytes = 3; break;
+    case 0xc4: opcode_bytes = 3; break;
+    case 0xc6: opcode_bytes = 2; break;
+    case 0xca: opcode_bytes = 3; break;
+    case 0xcb: opcode_bytes = 3; break;
+    case 0xcc: opcode_bytes = 3; break;
+    case 0xcd: opcode_bytes = 3; break;
+    case 0xce: opcode_bytes = 2; break;
+    case 0xd2: opcode_bytes = 3; break;
+    case 0xd3: opcode_bytes = 2; break;
+    case 0xd4: opcode_bytes = 3; break;
+    case 0xd6: opcode_bytes = 2; break;
+    case 0xda: opcode_bytes = 3; break;
+    case 0xdb: opcode_bytes = 2; break;
+    case 0xdc: opcode_bytes = 3; break;
+    case 0xdd: opcode_bytes = 3; break;
+    case 0xde: opcode_bytes = 2; break;
+    case 0xe2: opcode_bytes = 3; break;
+    case 0xe4: opcode_bytes = 3; break;
+    case 0xe6: opcode_bytes = 2; break;
+    case 0xea: opcode_bytes = 3; break;
+    case 0xec: opcode_bytes = 3; break;
+    case 0xed: opcode_bytes = 3; break;
+    case 0xee: opcode_bytes = 2; break;
+    case 0xf2: opcode_bytes = 3; break;
+    case 0xf4: opcode_bytes = 3; break;
+    case 0xf6: opcode_bytes = 2; break;
+    case 0xfa: opcode_bytes = 3; break;
+    case 0xfc: opcode_bytes = 3; break;
+    case 0xfd: opcode_bytes = 3; break;
+    case 0xfe: opcode_bytes = 2; break;
+    //never reach here
+    default : opcode_bytes = 1;
+  }
+  return opcode_bytes;
+}
+
+void print_instruction(uint8_t* code_buffer, uint16_t pc){
   switch(code_buffer[pc]){
     case 0x00: printf("NOP"); break;
-    case 0x01: printf("LXI    B,#$%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); opcode_bytes=3; break;
+    case 0x01: printf("LXI    B,#$%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); break;
     case 0x02: printf("STAX   B"); break;
     case 0x03: printf("INX    B"); break;
     case 0x04: printf("INR    B"); break;
     case 0x05: printf("DCR    B"); break;
-    case 0x06: printf("MVI    B,#$%02x", code_buffer[pc+1]); opcode_bytes=2; break;
+    case 0x06: printf("MVI    B,#$%02x", code_buffer[pc+1]); break;
     case 0x07: printf("RLC"); break;
     case 0x08: printf("NOP"); break;
     case 0x09: printf("DAD    B"); break;
@@ -37,16 +194,16 @@ uint8_t disassemble_opcode(uint8_t* code_buffer, uint16_t pc){
     case 0x0b: printf("DCX    B"); break;
     case 0x0c: printf("INR    C"); break;
     case 0x0d: printf("DCR    C"); break;
-    case 0x0e: printf("MVI    C,#$%02x", code_buffer[pc+1]); opcode_bytes = 2;	break;
+    case 0x0e: printf("MVI    C,#$%02x", code_buffer[pc+1]); break;
     case 0x0f: printf("RRC"); break;
 
     case 0x10: printf("NOP"); break;
-    case 0x11: printf("LXI    D,#$%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); opcode_bytes=3; break;
+    case 0x11: printf("LXI    D,#$%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); break;
     case 0x12: printf("STAX   D"); break;
     case 0x13: printf("INX    D"); break;
     case 0x14: printf("INR    D"); break;
     case 0x15: printf("DCR    D"); break;
-    case 0x16: printf("MVI    D,#$%02x", code_buffer[pc+1]); opcode_bytes=2; break;
+    case 0x16: printf("MVI    D,#$%02x", code_buffer[pc+1]); break;
     case 0x17: printf("RAL"); break;
     case 0x18: printf("NOP"); break;
     case 0x19: printf("DAD    D"); break;
@@ -54,41 +211,41 @@ uint8_t disassemble_opcode(uint8_t* code_buffer, uint16_t pc){
     case 0x1b: printf("DCX    D"); break;
     case 0x1c: printf("INR    E"); break;
     case 0x1d: printf("DCR    E"); break;
-    case 0x1e: printf("MVI    E,#$%02x", code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0x1e: printf("MVI    E,#$%02x", code_buffer[pc+1]); break;
     case 0x1f: printf("RAR"); break;
 
     case 0x20: printf("NOP"); break;
-    case 0x21: printf("LXI    H,#$%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); opcode_bytes=3; break;
-    case 0x22: printf("SHLD   $%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); opcode_bytes=3; break;
+    case 0x21: printf("LXI    H,#$%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); break;
+    case 0x22: printf("SHLD   $%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); break;
     case 0x23: printf("INX    H"); break;
     case 0x24: printf("INR    H"); break;
     case 0x25: printf("DCR    H"); break;
-    case 0x26: printf("MVI    H,#$%02x", code_buffer[pc+1]); opcode_bytes=2; break;
+    case 0x26: printf("MVI    H,#$%02x", code_buffer[pc+1]); break;
     case 0x27: printf("DAA"); break;
     case 0x28: printf("NOP"); break;
     case 0x29: printf("DAD    H"); break;
-    case 0x2a: printf("LHLD   $%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); opcode_bytes=3; break;
+    case 0x2a: printf("LHLD   $%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); break;
     case 0x2b: printf("DCX    H"); break;
     case 0x2c: printf("INR    L"); break;
     case 0x2d: printf("DCR    L"); break;
-    case 0x2e: printf("MVI    L,#$%02x", code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0x2e: printf("MVI    L,#$%02x", code_buffer[pc+1]); break;
     case 0x2f: printf("CMA"); break;
 
     case 0x30: printf("NOP"); break;
-    case 0x31: printf("LXI    SP,#$%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); opcode_bytes=3; break;
-    case 0x32: printf("STA    $%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); opcode_bytes=3; break;
+    case 0x31: printf("LXI    SP,#$%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); break;
+    case 0x32: printf("STA    $%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); break;
     case 0x33: printf("INX    SP"); break;
     case 0x34: printf("INR    M"); break;
     case 0x35: printf("DCR    M"); break;
-    case 0x36: printf("MVI    M,#$%02x", code_buffer[pc+1]); opcode_bytes=2; break;
+    case 0x36: printf("MVI    M,#$%02x", code_buffer[pc+1]); break;
     case 0x37: printf("STC"); break;
     case 0x38: printf("NOP"); break;
     case 0x39: printf("DAD    SP"); break;
-    case 0x3a: printf("LDA    $%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); opcode_bytes=3; break;
+    case 0x3a: printf("LDA    $%02x%02x", code_buffer[pc+2], code_buffer[pc+1]); break;
     case 0x3b: printf("DCX    SP"); break;
     case 0x3c: printf("INR    A"); break;
     case 0x3d: printf("DCR    A"); break;
-    case 0x3e: printf("MVI    A,#$%02x", code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0x3e: printf("MVI    A,#$%02x", code_buffer[pc+1]); break;
     case 0x3f: printf("CMC"); break;
 
     case 0x40: printf("MOV    B,B"); break;
@@ -229,82 +386,81 @@ uint8_t disassemble_opcode(uint8_t* code_buffer, uint16_t pc){
 
     case 0xc0: printf("RNZ"); break;
     case 0xc1: printf("POP    B"); break;
-    case 0xc2: printf("JNZ    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xc3: printf("JMP    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xc4: printf("CNZ    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
+    case 0xc2: printf("JNZ    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xc3: printf("JMP    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xc4: printf("CNZ    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
     case 0xc5: printf("PUSH   B"); break;
-    case 0xc6: printf("ADI    #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0xc6: printf("ADI    #$%02x",code_buffer[pc+1]); break;
     case 0xc7: printf("RST    0"); break;
     case 0xc8: printf("RZ"); break;
     case 0xc9: printf("RET"); break;
-    case 0xca: printf("JZ     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xcb: printf("JMP    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xcc: printf("CZ     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xcd: printf("CALL   $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xce: printf("ACI    #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0xca: printf("JZ     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xcb: printf("JMP    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xcc: printf("CZ     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xcd: printf("CALL   $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xce: printf("ACI    #$%02x",code_buffer[pc+1]); break;
     case 0xcf: printf("RST    1"); break;
 
     case 0xd0: printf("RNC"); break;
     case 0xd1: printf("POP    D"); break;
-    case 0xd2: printf("JNC    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xd3: printf("OUT    #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
-    case 0xd4: printf("CNC    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
+    case 0xd2: printf("JNC    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xd3: printf("OUT    #$%02x",code_buffer[pc+1]); break;
+    case 0xd4: printf("CNC    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
     case 0xd5: printf("PUSH   D"); break;
-    case 0xd6: printf("SUI    #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0xd6: printf("SUI    #$%02x",code_buffer[pc+1]); break;
     case 0xd7: printf("RST    2"); break;
     case 0xd8: printf("RC");  break;
     case 0xd9: printf("RET"); break;
-    case 0xda: printf("JC     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xdb: printf("IN     #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
-    case 0xdc: printf("CC     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xdd: printf("CALL   $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xde: printf("SBI    #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0xda: printf("JC     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xdb: printf("IN     #$%02x",code_buffer[pc+1]); break;
+    case 0xdc: printf("CC     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xdd: printf("CALL   $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xde: printf("SBI    #$%02x",code_buffer[pc+1]); break;
     case 0xdf: printf("RST    3"); break;
 
     case 0xe0: printf("RPO"); break;
     case 0xe1: printf("POP    H"); break;
-    case 0xe2: printf("JPO    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
+    case 0xe2: printf("JPO    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
     case 0xe3: printf("XTHL");break;
-    case 0xe4: printf("CPO    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
+    case 0xe4: printf("CPO    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
     case 0xe5: printf("PUSH   H"); break;
-    case 0xe6: printf("ANI    #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0xe6: printf("ANI    #$%02x",code_buffer[pc+1]); break;
     case 0xe7: printf("RST    4"); break;
     case 0xe8: printf("RPE"); break;
     case 0xe9: printf("PCHL");break;
-    case 0xea: printf("JPE    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
+    case 0xea: printf("JPE    $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
     case 0xeb: printf("XCHG"); break;
-    case 0xec: printf("CPE     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xed: printf("CALL   $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xee: printf("XRI    #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0xec: printf("CPE     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xed: printf("CALL   $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xee: printf("XRI    #$%02x",code_buffer[pc+1]); break;
     case 0xef: printf("RST    5"); break;
 
     case 0xf0: printf("RP");  break;
     case 0xf1: printf("POP    PSW"); break;
-    case 0xf2: printf("JP     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
+    case 0xf2: printf("JP     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
     case 0xf3: printf("DI");  break;
-    case 0xf4: printf("CP     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
+    case 0xf4: printf("CP     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
     case 0xf5: printf("PUSH   PSW"); break;
-    case 0xf6: printf("ORI    #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0xf6: printf("ORI    #$%02x",code_buffer[pc+1]); break;
     case 0xf7: printf("RST    6"); break;
     case 0xf8: printf("RM");  break;
     case 0xf9: printf("SPHL");break;
-    case 0xfa: printf("JM     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
+    case 0xfa: printf("JM     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
     case 0xfb: printf("EI");  break;
-    case 0xfc: printf("CM     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xfd: printf("CALL   $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); opcode_bytes = 3; break;
-    case 0xfe: printf("CPI    #$%02x",code_buffer[pc+1]); opcode_bytes = 2; break;
+    case 0xfc: printf("CM     $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xfd: printf("CALL   $%02x%02x",code_buffer[pc+2],code_buffer[pc+1]); break;
+    case 0xfe: printf("CPI    #$%02x",code_buffer[pc+1]); break;
     case 0xff: printf("RST    7"); break;
     //never reach here
-    default : opcode_bytes = -1;
+    default : printf("INVALID OPCODE");
   }
   printf("\n");
-
-  return opcode_bytes;
 }
 
 uint8_t emulate_instruction(uint8_t opcode){
     
   uint8_t cpu_cycles=-1;
+  bool update_PC = true;
 
   switch(opcode){
     //nop
@@ -933,12 +1089,430 @@ uint8_t emulate_instruction(uint8_t opcode){
         cpu_cycles = 5;
         break;
 
+    case 0x80:            /* add b */
+        cpu_cycles = 4;
+        add(B);
+        break;
+
+    case 0x81:            /* add c */
+        cpu_cycles = 4;
+        add(C);
+        break;
+
+    case 0x82:            /* add d */
+        cpu_cycles = 4;
+        add(D);
+        break;
+
+    case 0x83:            /* add e */
+        cpu_cycles = 4;
+        add(E);
+        break;
+
+    case 0x84:            /* add h */
+        cpu_cycles = 4;
+        add(H);
+        break;
+
+    case 0x85:            /* add l */
+        cpu_cycles = 4;
+        add(L);
+        break;
+
+    case 0x86:            /* add m */
+        cpu_cycles = 7;
+        data8 = RD_BYTE(HL);
+        add(data8);
+        break;
+
+    case 0x87:            /* add a */
+        cpu_cycles = 4;
+        add(A);
+        break;
+
+    case 0x88:            /* adc b */
+        cpu_cycles = 4;
+        add_with_carry(B);
+        break;
+
+    case 0x89:            /* adc c */
+        cpu_cycles = 4;
+        add_with_carry(C);
+        break;
+
+    case 0x8A:            /* adc d */
+        cpu_cycles = 4;
+        add_with_carry(D);
+        break;
+
+    case 0x8B:            /* adc e */
+        cpu_cycles = 4;
+        add_with_carry(E);
+        break;
+
+    case 0x8C:            /* adc h */
+        cpu_cycles = 4;
+        add_with_carry(H);
+        break;
+
+    case 0x8D:            /* adc l */
+        cpu_cycles = 4;
+        add_with_carry(L);
+        break;
+
+    case 0x8E:            /* adc m */
+        cpu_cycles = 7;
+        data8 = RD_BYTE(HL);
+        add_with_carry(data8);
+        break;
+
+    case 0x8F:            /* adc a */
+        cpu_cycles = 4;
+        add_with_carry(A);
+        break;
+
+    case 0x90:            /* sub b */
+        cpu_cycles = 4;
+        subtract(B);
+        break;
+
+    case 0x91:            /* sub c */
+        cpu_cycles = 4;
+        subtract(C);
+        break;
+
+    case 0x92:            /* sub d */
+        cpu_cycles = 4;
+        subtract(D);
+        break;
+
+    case 0x93:            /* sub e */
+        cpu_cycles = 4;
+        subtract(E);
+        break;
+
+    case 0x94:            /* sub h */
+        cpu_cycles = 4;
+        subtract(H);
+        break;
+
+    case 0x95:            /* sub l */
+        cpu_cycles = 4;
+        subtract(L);
+        break;
+
+    case 0x96:            /* sub m */
+        cpu_cycles = 7;
+        data8 = RD_BYTE(HL);
+        subtract(data8);
+        break;
+
+    case 0x97:            /* sub a */
+        cpu_cycles = 4;
+        subtract(A);
+        break;
+
+    case 0x98:            /* sbb b */
+        cpu_cycles = 4;
+        subtract_with_borrow(B);
+        break;
+
+    case 0x99:            /* sbb c */
+        cpu_cycles = 4;
+        subtract_with_borrow(C);
+        break;
+
+    case 0x9A:            /* sbb d */
+        cpu_cycles = 4;
+        subtract_with_borrow(D);
+        break;
+
+    case 0x9B:            /* sbb e */
+        cpu_cycles = 4;
+        subtract_with_borrow(E);
+        break;
+
+    case 0x9C:            /* sbb h */
+        cpu_cycles = 4;
+        subtract_with_borrow(H);
+        break;
+
+    case 0x9D:            /* sbb l */
+        cpu_cycles = 4;
+        subtract_with_borrow(L);
+        break;
+
+    case 0x9E:            /* sbb m */
+        cpu_cycles = 7;
+        data8 = RD_BYTE(HL);
+        subtract_with_borrow(data8);
+        break;
+
+    case 0x9F:            /* sbb a */
+        cpu_cycles = 4;
+        subtract_with_borrow(A);
+        break;
+
+    case 0xA0:            /* ana b */
+        cpu_cycles = 4;
+        logical_and(B);
+        break;
+
+    case 0xA1:            /* ana c */
+        cpu_cycles = 4;
+        logical_and(C);
+        break;
+
+    case 0xA2:            /* ana d */
+        cpu_cycles = 4;
+        logical_and(D);
+        break;
+
+    case 0xA3:            /* ana e */
+        cpu_cycles = 4;
+        logical_and(E);
+        break;
+
+    case 0xA4:            /* ana h */
+        cpu_cycles = 4;
+        logical_and(H);
+        break;
+
+    case 0xA5:            /* ana l */
+        cpu_cycles = 4;
+        logical_and(L);
+        break;
+
+    case 0xA6:            /* ana m */
+        cpu_cycles = 7;
+        data8 = RD_BYTE(HL);
+        logical_and(data8);
+        break;
+
+    case 0xA7:            /* ana a */
+        cpu_cycles = 4;
+        logical_and(A);
+        break;
+
+    case 0xA8:            /* xra b */
+        cpu_cycles = 4;
+        logical_xor(B);
+        break;
+
+    case 0xA9:            /* xra c */
+        cpu_cycles = 4;
+        logical_xor(C);
+        break;
+
+    case 0xAA:            /* xra d */
+        cpu_cycles = 4;
+        logical_xor(D);
+        break;
+
+    case 0xAB:            /* xra e */
+        cpu_cycles = 4;
+        logical_xor(E);
+        break;
+
+    case 0xAC:            /* xra h */
+        cpu_cycles = 4;
+        logical_xor(H);
+        break;
+
+    case 0xAD:            /* xra l */
+        cpu_cycles = 4;
+        logical_xor(L);
+        break;
+
+    case 0xAE:            /* xra m */
+        cpu_cycles = 7;
+        data8 = RD_BYTE(HL);
+        logical_xor(data8);
+        break;
+
+    case 0xAF:            /* xra a */
+        cpu_cycles = 4;
+        logical_xor(A);
+        break;
+
+    case 0xB0:            /* ora b */
+        cpu_cycles = 4;
+        logical_or(B);
+        break;
+
+    case 0xB1:            /* ora c */
+        cpu_cycles = 4;
+        logical_or(C);
+        break;
+
+    case 0xB2:            /* ora d */
+        cpu_cycles = 4;
+        logical_or(D);
+        break;
+
+    case 0xB3:            /* ora e */
+        cpu_cycles = 4;
+        logical_or(E);
+        break;
+
+    case 0xB4:            /* ora h */
+        cpu_cycles = 4;
+        logical_or(H);
+        break;
+
+    case 0xB5:            /* ora l */
+        cpu_cycles = 4;
+        logical_or(L);
+        break;
+
+    case 0xB6:            /* ora m */
+        cpu_cycles = 7;
+        data8 = RD_BYTE(HL);
+        logical_or(data8);
+        break;
+
+    case 0xB7:            /* ora a */
+        cpu_cycles = 4;
+        logical_or(A);
+        break;
+
+    case 0xB8:            /* cmp b */
+        cpu_cycles = 4;
+        compare(B);
+        break;
+
+    case 0xB9:            /* cmp c */
+        cpu_cycles = 4;
+        compare(C);
+        break;
+
+    case 0xBA:            /* cmp d */
+        cpu_cycles = 4;
+        compare(D);
+        break;
+
+    case 0xBB:            /* cmp e */
+        cpu_cycles = 4;
+        compare(E);
+        break;
+
+    case 0xBC:            /* cmp h */
+        cpu_cycles = 4;
+        compare(H);
+        break;
+
+    case 0xBD:            /* cmp l */
+        cpu_cycles = 4;
+        compare(L);
+        break;
+
+    case 0xBE:            /* cmp m */
+        cpu_cycles = 7;
+        data8 = RD_BYTE(HL);
+        compare(data8);
+        break;
+
+    case 0xBF:            /* cmp a */
+        cpu_cycles = 4;
+        compare(A);
+        break;
+
+    case 0xC0:            /* rnz */
+        cpu_cycles = 5;
+        if (!Z) {
+            cpu_cycles = 11;
+            pop(PC);
+            update_PC = false;
+        }
+        break;
+
+    case 0xC1:            /* pop b */
+        cpu_cycles = 11;
+        pop(BC);
+        break;
+
+    case 0xC2:            /* jnz addr */
+        cpu_cycles = 10;
+        if (!Z) {
+            PC = RD_WORD(PC+1);
+            update_PC = false;
+        }
+        break;
+
+    case 0xC3:            /* jmp addr */
+    case 0xCB:            /* jmp addr, undocumented */
+        cpu_cycles = 10;
+        PC = RD_WORD(PC+1);
+        update_PC = false;
+        break;
+
+    case 0xC4:            /* cnz addr */
+        cpu_cycles = 11;
+        if(!Z){
+            cpu_cycles = 17;
+            call();
+            update_PC = false;
+        }
+        break;
+
+    case 0xC5:            /* push b */
+        cpu_cycles = 11;
+        push(BC);
+        break;
+
+    case 0xC6:            /* adi data8 */
+        cpu_cycles = 7;
+        data8 = RD_BYTE(PC+1);
+        add(data8);
+        break;
+
+//    case 0xC7:            /* rst 0 */
+//        cpu_cycles = 11;
+//        RST(0x0000);
+//        break;
+
+    case 0xC8:            /* rz */
+        cpu_cycles = 5;
+        if(Z){
+            cpu_cycles = 11;
+            pop(PC);
+            update_PC=false;
+            return cpu_cycles;
+        }
+        break;
+
+    case 0xC9:            /* ret */
+    case 0xD9:            /* ret, undocumented */
+        cpu_cycles = 10;
+        pop(PC);
+        update_PC = false;
+        break;
+
+    case 0xCA:            /* jz addr */
+        cpu_cycles = 10;
+        if (Z) {
+            PC = RD_WORD(PC);
+            update_PC = false;
+        }
+        break;
+
+    case 0xCC:            /* cz addr */
+        cpu_cycles = 11;
+        if(Z){
+            cpu_cycles = 17;
+            call();
+            update_PC = false;
+        }
+        break;
+
     default : break;
 
   }
+  if(update_PC){
+    PC += get_opcode_bytes(opcode);
+  }
 
   return cpu_cycles;
-
 }
 
 void unimplemented_instruction(uint8_t opcode){
@@ -948,6 +1522,8 @@ void unimplemented_instruction(uint8_t opcode){
 
 void dummy_execute(){
   uint16_t pc = 0;
-  while(pc < file_size)
-      pc += disassemble_opcode(code_buffer, pc);
+  while(pc < file_size){
+    print_instruction(code_buffer,pc);
+    pc += get_opcode_bytes(code_buffer[pc]);
+  }
 }

@@ -75,3 +75,7 @@ uint8_t update_parity_flag(uint8_t reg){
 uint8_t update_zero_flag(uint8_t reg){
   return (reg==0);
 }
+
+uint8_t update_carry_flag(uint16_t reg){
+  return ((reg & CARRY_CHECK_MASK) != 0);
+}
