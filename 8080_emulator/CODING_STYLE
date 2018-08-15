@@ -1,0 +1,5 @@
+I have used the Kernel Coding style in the source code with the exceptions mentioned below.
+https://www.kernel.org/doc/html/latest/process/coding-style.html
+
+1. Tabs are 4 spaces.
+2. ..

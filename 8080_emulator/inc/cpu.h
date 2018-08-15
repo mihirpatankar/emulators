@@ -214,11 +214,67 @@ static uint8_t  ls_nibble, ms_nibble, temp_carry;
     } while(0)
 
 /*
+ * Auxiliary carry is affected by AND operation in 8080.
+ * It is the value of OR of the 3rd bit of the values being AND'ed
+ */
+
+#define ANA(v)                                      \
+    do {                                            \
+        A_FLAG = (((A | v) & 0x08) == 0);           \
+        A &= v;                                     \
+        C_FLAG = 0;                                 \
+        P_FLAG = parity[A];                         \
+        Z_FLAG = (A==0);                            \
+        S_FLAG = ((A & 0x80) != 0);                 \
+    } while(0)
+
+#define XRA(v)                                      \
+    do {                                            \
+        A ^= v;                                     \
+        C_FLAG = 0;                                 \
+        P_FLAG = parity[A];                         \
+        A_FLAG = 0;                                 \
+        Z_FLAG = (A==0);                            \
+        S_FLAG = ((A & 0x80) != 0);                 \
+    } while(0)
+
+#define ORA(v)                                      \
+    do {                                            \
+        A |= v;                                     \
+        C_FLAG = 0;                                 \
+        P_FLAG = parity[A];                         \
+        A_FLAG = 0;                                 \
+        Z_FLAG = (A==0);                            \
+        S_FLAG = ((A & 0x80) != 0);                 \
+    } while(0)
+
+#define CMP(v)                                      \
+    do {                                            \
+        temp16_reg = (uint16_t) A - (v);            \
+        temp8_reg = ((A & 0x8) >> 1)                \
+                    | ((v & 0x8) >> 2)              \
+                    | ((temp16_reg & 0x8) >> 3);    \
+        C_FLAG = (A) < (v);                         \
+        P_FLAG = parity[temp16_reg & 0xFF];         \
+        A_FLAG = !aux_carry_subtract[temp8_reg];    \
+        Z_FLAG = (A == v);                          \
+        S_FLAG = ((temp16_reg & 0x80) != 0);        \
+    } while(0)
+
+/*
  * Initialize the CPU for operation. This involves setting the PC to the value
  * passed and presetting the bits of the status/condition register
  */
 void i8080_init(uint16_t pc);
 
+/*
+ * Runs the opcode at PC and increments PC
+ * Returns the cycles taken in this instruction
+ * 
+ * Note: Total cycle count is updated directly. 
+ *       DO NOT USE the returned value for updating CYCLES
+ */
+int i8080_run_insn(void);
 
 
 #endif

@@ -11,8 +11,9 @@ void i8080_init(uint16_t pc) {
     UN5     = 0;
     Z_FLAG  = 0;
     S_FLAG  = 0;
-
-    PC = pc;
+    
+    CYCLES  = 0;
+    PC      = pc;
 }
 
 void UnimplementedInstruction(void);
@@ -233,6 +234,73 @@ int i8080_run_insn(void) {
                    ADD(temp_data_reg, 0);
                    P_FLAG = parity[A];
                    C_FLAG = temp_carry; break;
+
+        // Logical
+        case 0xA0: ANA(B); break;
+        case 0xA1: ANA(C); break;
+        case 0xA2: ANA(D); break;
+        case 0xA3: ANA(E); break;
+        case 0xA4: ANA(H); break;
+        case 0xA5: ANA(L); break;
+        case 0xA6: temp_data_reg = read_byte(HL);
+                   ANA(temp_data_reg); break;
+        case 0xA7: ANA(A); break;
+        
+        case 0xE6: temp_data_reg = read_byte(PC++);
+                   ANA(temp_data_reg); break;
+
+        case 0xA8: XRA(B); break;
+        case 0xA9: XRA(C); break;
+        case 0xAA: XRA(D); break;
+        case 0xAB: XRA(E); break;
+        case 0xAC: XRA(H); break;
+        case 0xAD: XRA(L); break;
+        case 0xAE: temp_data_reg = read_byte(HL);
+                   XRA(temp_data_reg); break;
+        case 0xAF: XRA(A); break;
+        
+        case 0xEE: temp_data_reg = read_byte(PC++);
+                   XRA(temp_data_reg); break;
+                   
+        case 0xB0: ORA(B); break;
+        case 0xB1: ORA(C); break;
+        case 0xB2: ORA(D); break;
+        case 0xB3: ORA(E); break;
+        case 0xB4: ORA(H); break;
+        case 0xB5: ORA(L); break;
+        case 0xB6: temp_data_reg = read_byte(HL);
+                   ORA(temp_data_reg); break;
+        case 0xB7: ORA(A); break;
+        
+        case 0xF6: temp_data_reg = read_byte(PC++);
+                   ORA(temp_data_reg); break;
+        
+        case 0xB8: CMP(B); break;
+        case 0xB9: CMP(C); break;
+        case 0xBA: CMP(D); break;
+        case 0xBB: CMP(E); break;
+        case 0xBC: CMP(H); break;
+        case 0xBD: CMP(L); break;
+        case 0xBE: temp_data_reg = read_byte(HL);
+                   CMP(temp_data_reg); break;
+        case 0xBF: CMP(A); break;
+        
+        case 0xFE: temp_data_reg = read_byte(PC++);
+                   CMP(temp_data_reg); break;
+
+        case 0x07: C_FLAG = ((A & 0x80) != 0);
+                   A = (A << 1) | C_FLAG; break;
+        case 0x0F: C_FLAG = (A & 0x1); 
+                   A = (A >> 1) | (C_FLAG << 7); break;
+        case 0x17: temp_data_reg = C_FLAG;
+                   C_FLAG = ((A & 0x80) != 0);
+                   A = (A << 1) | (temp_data_reg); break;
+        case 0x1F: temp_data_reg = C_FLAG;
+                   C_FLAG = (A & 0x1);
+                   A = (A << 1) | (temp_data_reg << 7); break;
+        case 0x2F: A ^= 0xFF; break;
+        case 0x3F: C_FLAG = !C_FLAG; break;
+        case 0x37: C_FLAG = 1; break;
 
 
 
