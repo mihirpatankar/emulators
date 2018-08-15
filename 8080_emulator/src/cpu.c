@@ -1,3 +1,4 @@
+#include "hal.h"
 #include "cpu.h"
 
 static i8080 cpu;
@@ -16,12 +17,6 @@ void i8080_init(uint16_t pc) {
     PC      = pc;
 }
 
-void UnimplementedInstruction(void);
-
-
-/*
- * Can probably return clock cycles
- */
 int i8080_run_insn(void) {
     uint8_t opcode = read_byte(PC++);
     CYCLES += opcode_cycles[opcode];
@@ -308,7 +303,7 @@ int i8080_run_insn(void) {
 
 
         case 0x00:
-        default: UnimplementedInstruction(); break;   
+        default: break;   
     }
     return opcode_cycles[opcode]; 
 }

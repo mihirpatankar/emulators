@@ -1,6 +1,8 @@
 #ifndef __HAL_8080_H__
 #define __HAL_8080_H__
 
+#include <stdint.h>
+
 /*
  * The entire addressable memory
  */

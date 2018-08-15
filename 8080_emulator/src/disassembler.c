@@ -368,7 +368,11 @@ int main(int argc, char* argv[])
 
     uint8_t *buffer = (uint8_t *) malloc(fsize);
     
-    fread(buffer, fsize, 1, fp);
+    int ret = fread(buffer, fsize, 1, fp);
+    if(ret == 0) {
+        printf("Error in reading");
+        return -1;
+    }
     fclose(fp);
     
     uint16_t pc = 0;

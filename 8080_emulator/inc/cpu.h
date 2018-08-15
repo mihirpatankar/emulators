@@ -1,6 +1,8 @@
 #ifndef __CPU_8080_H__
 #define __CPU_8080_H__
 
+#include <stdint.h>
+
 /*
  * Register Pairs were defined as a union to get access to each 
  * register separately as well as together conveniently
