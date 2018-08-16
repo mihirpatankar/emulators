@@ -21,15 +21,18 @@ typedef union {
  * http://www.nj7p.org/Manuals/PDFs/Intel/9800301D.pdf
  * Page: 3-45
  */
-typedef struct {
-    uint8_t carry_flag  :1;
-    uint8_t undef_bit1  :1;
-    uint8_t parity_flag :1;
-    uint8_t undef_bit3  :1;
-    uint8_t aux_carry   :1;
-    uint8_t undef_bit5  :1;
-    uint8_t zero_flag   :1;
-    uint8_t sign_flag   :1;
+typedef union {
+    struct {
+        uint8_t carry_flag  :1;
+        uint8_t undef_bit1  :1;
+        uint8_t parity_flag :1;
+        uint8_t undef_bit3  :1;
+        uint8_t aux_carry   :1;
+        uint8_t undef_bit5  :1;
+        uint8_t zero_flag   :1;
+        uint8_t sign_flag   :1;
+    } c_bit;
+   uint8_t f_reg; 
 } condition_reg;
 
 /*
@@ -43,7 +46,8 @@ typedef struct {
     uint8_t iff; //interrupt flip flop - for EI DI instructions    
 } i8080;
 
-#define FLAGS   cpu.c
+#define FLAGS   cpu.c.c_bit
+#define F_REG   cpu.c.f_reg
 #define PSW     cpu.psw.w
 #define BC      cpu.bc.w
 #define DE      cpu.de.w
@@ -156,7 +160,7 @@ static uint32_t temp32_reg = 0;
 static uint16_t temp16_reg = 0; 
 static uint8_t  temp8_reg = 0;
 static uint8_t  temp_data_reg = 0;
-
+static uint16_t temp16_data = 0;
 /*
  * Need the following for DAA
  */
@@ -262,6 +266,32 @@ static uint8_t  ls_nibble, ms_nibble, temp_carry;
         Z_FLAG = (A == v);                          \
         S_FLAG = ((temp16_reg & 0x80) != 0);        \
     } while(0)
+
+#define POP(rp)                                     \
+    do {                                            \
+        (rp) = read_word(SP);                       \
+        SP += 2;                                    \
+    } while(0)
+
+#define PUSH(rp)                                    \
+    do {                                            \
+        SP -= 2;                                    \
+        write_word(SP, rp);                         \
+    } while(0)
+
+#define CALL                                        \
+    do {                                            \
+        PUSH(PC + 2);                               \
+        PC = read_word(PC);                         \
+    } while(0)
+
+#define RST(index)                                  \
+    do {                                            \
+        temp16_reg = index << 3;                    \
+        PUSH(PC);                                   \
+        PC = temp16_reg;                            \
+    } while(0)
+
 
 /*
  * Initialize the CPU for operation. This involves setting the PC to the value

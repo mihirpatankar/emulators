@@ -272,7 +272,9 @@ uint16_t disassemble(uint8_t *buffer, uint16_t pc)
         case 0xFA: printf("JM $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
 
         case 0xCD: 
-        case 0xDD: //Undocumented CALL - ref[1]
+        case 0xDD: 
+        case 0xED:
+        case 0xFD: //Undocumented CALL - ref[1]
                    printf("CALL $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;
  
         case 0xC4: printf("CNZ $%02x%02x", buffer[pc+2], buffer[pc+1]); bytes+=2; break;

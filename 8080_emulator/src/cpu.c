@@ -297,13 +297,207 @@ int i8080_run_insn(void) {
         case 0x3F: C_FLAG = !C_FLAG; break;
         case 0x37: C_FLAG = 1; break;
 
+        // Branch
+        case 0xC3: 
+        case 0xCB: //Undocumented JMP - ref[1]
+                   PC = read_word(PC); break;
 
+        case 0xC2: if(Z_FLAG == 0) {
+                       PC = read_word(PC);
+                   } else {
+                      PC += 2; 
+                   } break;
+        case 0xCA: if(Z_FLAG != 0) {
+                       PC = read_word(PC);
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xD2: if(C_FLAG == 0) {
+                       PC = read_word(PC);
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xDA: if(C_FLAG != 0) {
+                       PC = read_word(PC);
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xE2: if(P_FLAG == 0) {
+                       PC = read_word(PC);
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xEA: if(P_FLAG != 0) {
+                       PC = read_word(PC);
+                   } else {
+                       PC += 2;
+                   } break; 
+        case 0xF2: if(S_FLAG == 0) {
+                       PC = read_word(PC);
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xFA: if(S_FLAG != 0) {
+                       PC = read_word(PC);
+                   } else {
+                       PC += 2;
+                   } break;
 
+        case 0xCD: 
+        case 0xDD: 
+        case 0xED:
+        case 0xFD: //Undocumented CALL - ref[1]
+                   CALL; break;
+ 
+        case 0xC4: if(Z_FLAG == 0) {
+                       CALL;
+                       CYCLES += 6;
+                   } else {
+                      PC += 2; 
+                   } break;
+        case 0xCC: if(Z_FLAG != 0) {
+                       CALL;
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xD4: if(C_FLAG == 0) {
+                       CALL;
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xDC: if(C_FLAG != 0) {
+                       CALL;
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xE4: if(P_FLAG == 0) {
+                       CALL;
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xEC: if(P_FLAG != 0) {
+                       CALL;
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break; 
+        case 0xF4: if(S_FLAG == 0) {
+                       CALL;
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xFC: if(S_FLAG != 0) {
+                       CALL;
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        
+        case 0xC9: 
+        case 0xD9: //Undocumented RET - ref[1]
+                   POP(PC); break;
+ 
+        case 0xC0: if(Z_FLAG == 0) {
+                       POP(PC);
+                       CYCLES += 6;
+                   } else {
+                      PC += 2; 
+                   } break;
+        case 0xC8: if(Z_FLAG != 0) {
+                       POP(PC);
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xD0: if(C_FLAG == 0) {
+                       POP(PC);
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xD8: if(C_FLAG != 0) {
+                       POP(PC);
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xE0: if(P_FLAG == 0) {
+                       POP(PC);
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xE8: if(P_FLAG != 0) {
+                       POP(PC);
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break; 
+        case 0xF0: if(S_FLAG == 0) {
+                       POP(PC);
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        case 0xF8: if(S_FLAG != 0) {
+                       POP(PC);
+                       CYCLES += 6;
+                   } else {
+                       PC += 2;
+                   } break;
+        
+        case 0xC7: RST(0x0); break;
+        case 0xCF: RST(0x1); break;
+        case 0xD7: RST(0x2); break;
+        case 0xDF: RST(0x3); break;
+        case 0xE7: RST(0x4); break;
+        case 0xEF: RST(0x5); break;
+        case 0xF7: RST(0x6); break;
+        case 0xFF: RST(0x7); break;
+        
+        case 0xE9: PC = HL; break;
+                   
+        // Stack, I/O and Machine Control
+        case 0xC5: PUSH(BC); break;
+        case 0xD5: PUSH(DE); break;
+        case 0xE5: PUSH(HL); break;
+        case 0xF5: F = F_REG; PUSH(PSW); break;
 
+        case 0xC1: POP(BC); break;
+        case 0xD1: POP(DE); break;
+        case 0xE1: POP(HL); break;
+        case 0xF1: POP(PSW); F_REG = F; break;
+                 
+        case 0xDB: // IN 
+                   break;
+        case 0xD3: // OUT
+                   break;
 
-
-        case 0x00:
-        default: break;   
+        case 0xE3: temp16_data = read_word(SP);
+                   write_word(SP, HL);
+                   HL = temp16_data; 
+                   break;
+        case 0xF9: SP = HL; break;
+        case 0xFB: IFF = 1; break; // TODO - ISR
+        case 0xF3: IFF = 0; break; // TODO - ISR
+        case 0x76: PC--; break;
+        case 0x00: 
+        case 0x08: // Undocumented NOP - ref[1]
+        case 0x10: // Undocumented NOP - ref[1]
+        case 0x18: // Undocumented NOP - ref[1]
+        case 0x20: // Undocumented NOP - ref[1]
+        case 0x28: // Undocumented NOP - ref[1]
+        case 0x30: // Undocumented NOP - ref[1]
+        case 0x38: // Undocumented NOP - ref[1]
+                   break;    
+        default: 
+                   // SHOULD NEVER REACH HERE
+                   break;    
     }
     return opcode_cycles[opcode]; 
 }
