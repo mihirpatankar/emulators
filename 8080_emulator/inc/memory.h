@@ -11,12 +11,11 @@
 #define WR_BYTE(addr, value) memory_write_byte(addr, value)
 #define WR_WORD(addr, value) memory_write_word(addr, value)
 
-uint8_t* memory;
+uint8_t memory[TOTAL_MEMORY];
 FILE* file_pointer;
 uint32_t file_size;
 uint8_t* code_buffer;
 
-void init_memory();
 uint16_t memory_read_word(uint16_t addr);
 void memory_write_word(uint16_t addr, uint16_t word);
 uint8_t memory_read_byte(uint16_t addr);

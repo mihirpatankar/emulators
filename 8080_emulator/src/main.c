@@ -2,6 +2,7 @@
 #include "cpu.h"
 #include "memory.h"
 #include "disassembler.h"
+#include "debug.h"
 
 int main(int argc, char* argv[]){
   if(argc != 2) {
@@ -10,6 +11,5 @@ int main(int argc, char* argv[]){
   }
 
  read_rom_into_memory(argv[1]);
- dummy_execute();
  return 0;
 }

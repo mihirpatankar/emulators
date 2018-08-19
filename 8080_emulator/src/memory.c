@@ -1,9 +1,5 @@
 #include "memory.h"
 
-void init_memory(){
-  memory = (uint8_t*)malloc(TOTAL_MEMORY);
-}
-
 uint16_t memory_read_word(uint16_t addr){
   uint8_t low_byte = memory_read_byte(addr);
   uint8_t high_byte = memory_read_byte(addr+1);

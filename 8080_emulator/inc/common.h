@@ -19,6 +19,9 @@
 #define HIGH_BYTE_MASK 0xFF00
 #define LOW_BYTE_MASK 0x00FF
 
+#define HIGH_NIBBLE_MASK 0xF0
+#define LOW_NIBBLE_MASK 0x0F
+
 #define BYTE 8
 #define WORD 16
 
