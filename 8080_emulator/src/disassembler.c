@@ -118,10 +118,10 @@ uint8_t emulate_instruction(uint8_t opcode){
         A = (A << 1) | CY;
         break;
 
-//    case 0x09:            /* dad b */
-//        cpu_cycles = 10;
-//        DAD(BC);
-//        break;
+    case 0x09:            /* dad b */
+        cpu_cycles = 10;
+        double_byte_add(BC);
+        break;
 
     case 0x0A:            /* ldax b */
         cpu_cycles = 7;
@@ -191,10 +191,10 @@ uint8_t emulate_instruction(uint8_t opcode){
         A = (A << 1) | data8;
         break;
 
-//    case 0x19:            /* dad d */
-//        cpu_cycles = 10;
-//        DAD(DE);
-//        break;
+    case 0x19:            /* dad d */
+        cpu_cycles = 10;
+        double_byte_add(DE);
+        break;
 
     case 0x1A:            /* ldax d */
         cpu_cycles = 7;
@@ -258,26 +258,28 @@ uint8_t emulate_instruction(uint8_t opcode){
         H = RD_BYTE(PC+1);
         break;
 
-//    case 0x27:            /* daa */
-//        cpu_cycles = 4;
-//        carry = (uns8)C_FLAG;
-//        add = 0;
-//        if (H_FLAG || (A & 0x0f) > 9) {
-//            add = 0x06;
-//        }
-//        if (C_FLAG || (A >> 4) > 9 || ((A >> 4) >= 9 && (A & 0x0f) > 9)) {
-//            add |= 0x60;
-//            carry = 1;
-//        }
-//        ADD(add);
-//        P_FLAG = PARITY(A);
-//        C_FLAG = carry;
-//        break;
+    case 0x27:            /* daa */
+        cpu_cycles = 4;
+        data8 = 0x00;
+        uint8_t temp_carry = CY;
+        uint8_t low_nibble = A & LOW_NIBBLE_MASK;
+        uint8_t high_nibble = (A & HIGH_NIBBLE_MASK) >> NIBBLE;
+        if (AC || low_nibble > 9) {
+            data8 = 0x06;
+        }
+        if (CY || high_nibble > 9 || (high_nibble >= 9 && low_nibble > 9)) {
+            data8 |= 0x60;
+            temp_carry = 1;
+        }
+        add(data8);
+        AC = update_parity_flag(A);
+        CY = temp_carry;
+        break;
 
-//    case 0x29:            /* dad hl */
-//        cpu_cycles = 10;
-//        DAD(HL);
-//        break;
+    case 0x29:            /* dad hl */
+        cpu_cycles = 10;
+        double_byte_add(HL);
+        break;
 
     case 0x2A:            /* ldhl addr */
         cpu_cycles = 16;
@@ -348,10 +350,10 @@ uint8_t emulate_instruction(uint8_t opcode){
         SET(CY);
         break;
 
-//    case 0x39:            /* dad sp */
-//        cpu_cycles = 10;
-//        DAD(SP);
-//        break;
+    case 0x39:            /* dad sp */
+        cpu_cycles = 10;
+        double_byte_add(SP);
+        break;
 
     case 0x3A:            /* lda addr */
         cpu_cycles = 13;
@@ -1156,10 +1158,10 @@ uint8_t emulate_instruction(uint8_t opcode){
         }
         break;
 
-//    case 0xD3:            /* out port8 */
-//        cpu_cycles = 10;
-//        i8080_hal_io_output(RD_BYTE(PC++), A);
-//        break;
+    case 0xD3:            /* out port8 */
+        cpu_cycles = 10;
+        handle_output(RD_BYTE(PC+1), A);
+        break;
 
     case 0xD4:            /* cnc addr */
         cpu_cycles = 11;
@@ -1204,10 +1206,10 @@ uint8_t emulate_instruction(uint8_t opcode){
         }
         break;
 
-//    case 0xDB:            /* in port8 */
-//        cpu_cycles = 10;
-//        A = i8080_hal_io_input(RD_BYTE(PC++));
-//        break;
+    case 0xDB:            /* in port8 */
+        cpu_cycles = 10;
+        A = handle_input(RD_BYTE(PC+1));
+        break;
 
     case 0xDC:            /* cc addr */
         cpu_cycles = 11;

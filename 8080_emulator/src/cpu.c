@@ -67,6 +67,14 @@ void handle_iff(uint16_t iff){
   //Do nothing
 }
 
+void handle_output(uint8_t port, uint8_t data){
+  //Do nothing
+}
+
+uint8_t handle_input(uint8_t port){
+  return 0;
+}
+
 uint8_t update_sign_flag(uint8_t reg){
   return ((reg & BIT_7_MASK) != 0);
 }
@@ -123,6 +131,19 @@ void add_with_carry(uint8_t reg){
   AC = aux_carry_add[data8];
   P = update_parity_flag(A);
   CY = update_carry_flag(data16);
+}
+
+void double_byte_add(uint16_t reg){
+  data32 = (uint32_t)HL + reg;
+  HL = data32 & 0xFFFF;
+  CY = (data32 & 0x10000L) !=0;
+}
+
+#define DAD(reg) \
+{                                               \
+    work32 = (uns32)HL + (reg);                 \
+    HL = work32 & 0xffff;                       \
+    C_FLAG = ((work32 & 0x10000L) != 0);        \
 }
 
 void subtract(uint8_t reg){

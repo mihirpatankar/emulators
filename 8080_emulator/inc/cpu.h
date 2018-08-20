@@ -93,6 +93,8 @@ void init_flags();
 void store_flags();
 void get_flags();
 void handle_iff(uint16_t iff);
+void handle_output(uint8_t port, uint8_t data);
+uint8_t handle_input(uint8_t port);
 
 uint8_t update_sign_flag(uint8_t reg);
 uint8_t update_parity_flag(uint8_t reg);
@@ -104,6 +106,7 @@ void decrement(uint8_t* reg);
 
 void add(uint8_t reg);
 void add_with_carry(uint8_t reg);
+void double_byte_add(uint16_t reg);
 void subtract(uint8_t reg);
 void subtract_with_borrow(uint8_t reg);
 void compare(uint8_t reg);

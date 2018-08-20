@@ -22,6 +22,7 @@
 #define HIGH_NIBBLE_MASK 0xF0
 #define LOW_NIBBLE_MASK 0x0F
 
+#define NIBBLE 4
 #define BYTE 8
 #define WORD 16
 
