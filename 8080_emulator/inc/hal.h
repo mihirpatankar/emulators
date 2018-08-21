@@ -2,11 +2,18 @@
 #define __HAL_8080_H__
 
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 /*
  * The entire addressable memory
  */
 static uint8_t memory[0x10000];
+
+/*
+ * Initialize memory
+ */
+uint8_t *memory_init(void);
 
 /*
  * For reading operations only address is needed

@@ -43,7 +43,7 @@ typedef struct {
     register_pair psw, bc, de, hl;
     register_pair sp, pc;
     condition_reg c;
-    uint8_t iff; //interrupt flip flop - for EI DI instructions    
+    uint8_t iff; //interrupt flip flop - for EI DI instructions
 } i8080;
 
 #define FLAGS   cpu.c.c_bit
@@ -173,7 +173,7 @@ static uint8_t  ls_nibble, ms_nibble, temp_carry;
                     | ((v & 0x8) >> 2)              \
                     | ((temp16_reg & 0x8) >> 3);    \
         A = temp16_reg & 0xFF;                      \
-        C_FLAG = ((temp16_reg & 0x100) >> 8);       \
+        C_FLAG = ((temp16_reg & 0x100) != 0);       \
         P_FLAG = parity[A];                         \
         A_FLAG = aux_carry_add[temp8_reg];          \
         Z_FLAG = (A == 0);                          \
@@ -187,7 +187,7 @@ static uint8_t  ls_nibble, ms_nibble, temp_carry;
                     | ((v & 0x8) >> 2)              \
                     | ((temp16_reg & 0x8) >> 3);    \
         A = temp16_reg & 0xFF;                      \
-        C_FLAG = ((temp16_reg & 0x100) >> 8);       \
+        C_FLAG = ((temp16_reg & 0x100) != 0);       \
         P_FLAG = parity[A];                         \
         A_FLAG = !aux_carry_subtract[temp8_reg];    \
         Z_FLAG = (A == 0);                          \
@@ -216,7 +216,7 @@ static uint8_t  ls_nibble, ms_nibble, temp_carry;
     do {                                            \
         temp32_reg = (uint32_t)HL + (rp);           \
         HL = temp32_reg & 0xFFFF;                   \
-        C_FLAG = ((temp32_reg &0x10000) >> 16);     \
+        C_FLAG = ((temp32_reg & 0x10000L) != 0);    \
     } while(0)
 
 /*
@@ -226,7 +226,7 @@ static uint8_t  ls_nibble, ms_nibble, temp_carry;
 
 #define ANA(v)                                      \
     do {                                            \
-        A_FLAG = (((A | v) & 0x08) == 0);           \
+        A_FLAG = (((A | v) & 0x08) != 0);           \
         A &= v;                                     \
         C_FLAG = 0;                                 \
         P_FLAG = parity[A];                         \
@@ -260,10 +260,10 @@ static uint8_t  ls_nibble, ms_nibble, temp_carry;
         temp8_reg = ((A & 0x8) >> 1)                \
                     | ((v & 0x8) >> 2)              \
                     | ((temp16_reg & 0x8) >> 3);    \
-        C_FLAG = (A) < (v);                         \
+        C_FLAG = ((temp16_reg & 0x100) != 0);       \
         P_FLAG = parity[temp16_reg & 0xFF];         \
         A_FLAG = !aux_carry_subtract[temp8_reg];    \
-        Z_FLAG = (A == v);                          \
+        Z_FLAG = ((temp16_reg & 0xFF) == 0);        \
         S_FLAG = ((temp16_reg & 0x80) != 0);        \
     } while(0)
 
@@ -308,5 +308,26 @@ void i8080_init(uint16_t pc);
  */
 int i8080_run_insn(void);
 
+/*
+ * Returns PC
+ */
+uint16_t i8080_get_current_PC(void);
+
+/*
+ * Returns each register
+ */ 
+uint8_t i8080_get_A(void);
+uint8_t i8080_get_B(void);
+uint8_t i8080_get_C(void);
+uint8_t i8080_get_D(void);
+uint8_t i8080_get_E(void);
+uint8_t i8080_get_F(void);
+uint8_t i8080_get_H(void);
+uint8_t i8080_get_L(void);
+
+uint16_t i8080_get_PSW(void);
+uint16_t i8080_get_BC(void);
+uint16_t i8080_get_DE(void);
+uint16_t i8080_get_HL(void);
 
 #endif

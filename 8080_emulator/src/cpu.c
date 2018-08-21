@@ -176,7 +176,7 @@ int i8080_run_insn(void) {
         case 0x9F: SUB(A, 1); break;
         
         case 0xDE: temp_data_reg = read_byte(PC++);
-                   SUB(temp_data_reg, 0); break;
+                   SUB(temp_data_reg, 1); break;
 
         case 0x04: INR(B); break;
         case 0x0C: INR(C); break;
@@ -292,7 +292,7 @@ int i8080_run_insn(void) {
                    A = (A << 1) | (temp_data_reg); break;
         case 0x1F: temp_data_reg = C_FLAG;
                    C_FLAG = (A & 0x1);
-                   A = (A << 1) | (temp_data_reg << 7); break;
+                   A = (A >> 1) | (temp_data_reg << 7); break;
         case 0x2F: A ^= 0xFF; break;
         case 0x3F: C_FLAG = !C_FLAG; break;
         case 0x37: C_FLAG = 1; break;
@@ -405,51 +405,43 @@ int i8080_run_insn(void) {
         case 0xC0: if(Z_FLAG == 0) {
                        POP(PC);
                        CYCLES += 6;
-                   } else {
-                      PC += 2; 
-                   } break;
+                   } 
+                   break;
         case 0xC8: if(Z_FLAG != 0) {
                        POP(PC);
                        CYCLES += 6;
-                   } else {
-                       PC += 2;
-                   } break;
+                   } 
+                   break;
         case 0xD0: if(C_FLAG == 0) {
                        POP(PC);
                        CYCLES += 6;
-                   } else {
-                       PC += 2;
-                   } break;
+                   }
+                   break;
         case 0xD8: if(C_FLAG != 0) {
                        POP(PC);
                        CYCLES += 6;
-                   } else {
-                       PC += 2;
-                   } break;
+                   } 
+                   break;
         case 0xE0: if(P_FLAG == 0) {
                        POP(PC);
                        CYCLES += 6;
-                   } else {
-                       PC += 2;
-                   } break;
+                   } 
+                   break;
         case 0xE8: if(P_FLAG != 0) {
                        POP(PC);
                        CYCLES += 6;
-                   } else {
-                       PC += 2;
-                   } break; 
+                   }
+                   break; 
         case 0xF0: if(S_FLAG == 0) {
                        POP(PC);
                        CYCLES += 6;
-                   } else {
-                       PC += 2;
-                   } break;
+                   } 
+                   break;
         case 0xF8: if(S_FLAG != 0) {
                        POP(PC);
                        CYCLES += 6;
-                   } else {
-                       PC += 2;
-                   } break;
+                   }
+                   break;
         
         case 0xC7: RST(0x0); break;
         case 0xCF: RST(0x1); break;
@@ -473,9 +465,11 @@ int i8080_run_insn(void) {
         case 0xE1: POP(HL); break;
         case 0xF1: POP(PSW); F_REG = F; break;
                  
-        case 0xDB: // IN 
+        case 0xDB: // IN
+                   PC++; 
                    break;
         case 0xD3: // OUT
+                   PC++;
                    break;
 
         case 0xE3: temp16_data = read_word(SP);
@@ -502,4 +496,22 @@ int i8080_run_insn(void) {
     return opcode_cycles[opcode]; 
 }
 
+uint16_t i8080_get_current_PC(void) {
+    return PC;
+}
+
+
+uint8_t i8080_get_A(void) { return A; }
+uint8_t i8080_get_B(void) { return B; }
+uint8_t i8080_get_C(void) { return C; }
+uint8_t i8080_get_D(void) { return D; }
+uint8_t i8080_get_E(void) { return E; }
+uint8_t i8080_get_F(void) { return F_REG; }
+uint8_t i8080_get_H(void) { return H; }
+uint8_t i8080_get_L(void) { return L; }
+
+uint16_t i8080_get_PSW(void) { return PSW; }
+uint16_t i8080_get_BC(void) { return BC; }
+uint16_t i8080_get_DE(void) { return DE; }
+uint16_t i8080_get_HL(void) { return HL; }
 

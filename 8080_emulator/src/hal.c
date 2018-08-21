@@ -1,5 +1,10 @@
 #include "hal.h"
 
+uint8_t *memory_init(void) {
+    memset(memory, 0, 0x10000);
+    return &memory[0];
+}
+
 uint16_t read_word(uint16_t address) {
     return read_byte(address) | read_byte(address+1) << 8;
 }
