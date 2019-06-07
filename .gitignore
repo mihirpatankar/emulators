@@ -1,2 +1,6 @@
 #Ignore project files
 */.project
+
+#Ignore build folder except scons
+build/*
+!build/Sconstruct
