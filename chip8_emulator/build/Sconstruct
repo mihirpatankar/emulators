@@ -1,0 +1,8 @@
+inc_path = '../inc'
+src_path = '../src'
+
+env=Environment(CPPPATH = inc_path,
+                CPPDEFINES=[],
+                LIBS=['SDL2']) 
+
+env.Program('chip8', Glob(src_path + '/*.c'))
