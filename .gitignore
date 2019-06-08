@@ -13,5 +13,5 @@ chip8_emulator/src/*.o
 # Ignore build folder except scons, ignore debug folder
 chip8_emulator/build/*
 chip8_emulator/debug/*
-chip8_emulator/!build/Sconstruct
-chip8_emulator/!build/pong.ch8
+!chip8_emulator/build/Sconstruct
+!chip8_emulator/build/pong.ch8
