@@ -1,17 +1,17 @@
 # Some of these are related to eclipse. So i keep them out of my repo
-.cproject
-.dep/
-.project
-.settings/
+chip8_emulator/.cproject
+chip8_emulator/.dep/
+chip8_emulator/.project
+chip8_emulator/.settings/
 
 # files being edited
-*~
+chip8_emulator/*~
 
 # make and build files
-src/*.o
+chip8_emulator/src/*.o
 
 # Ignore build folder except scons, ignore debug folder
-build/*
-debug/*
-!build/Sconstruct
-!build/pong.ch8
+chip8_emulator/build/*
+chip8_emulator/debug/*
+chip8_emulator/!build/Sconstruct
+chip8_emulator/!build/pong.ch8
