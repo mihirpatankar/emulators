@@ -1,2 +1,17 @@
-#Ignore project files
-*/.project
+# Some of these are related to eclipse. So i keep them out of my repo
+.cproject
+.dep/
+.project
+.settings/
+
+# files being edited
+*~
+
+# make and build files
+src/*.o
+
+# Ignore build folder except scons, ignore debug folder
+build/*
+debug/*
+!build/Sconstruct
+!build/pong.ch8
