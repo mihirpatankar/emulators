@@ -1,13 +1,17 @@
 #pragma once
+
 /*==============================================================================
  Include Files
  =============================================================================*/
 
 #include "common.h"
-#include "cpu.h"
-#include "mem.h"
-#include "display.h"
-#include "input.h"
+#include <SDL2/SDL.h>
+
+/*==============================================================================
+ Macros
+ =============================================================================*/
+
+#define KEY_INPUT_COUNT 16
 
 /*==============================================================================
  Type definitions
@@ -15,15 +19,12 @@
 
 typedef struct
 {
-  cpu cpu;
-  memory memory;
-  display display;
-  input input;
-}chip8;
+  uint8_t keys[KEY_INPUT_COUNT];
+} input;
 
 /*==============================================================================
  Function declarations
  =============================================================================*/
 
-void init(chip8* chip8);
-void emulate_cycle(chip8* chip8);
+void initialize_input(input* input);
+void process_input(input* input);

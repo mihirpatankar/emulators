@@ -13,6 +13,7 @@ void init(chip8* chip8)
   initialize_cpu(&chip8->cpu);
   initialize_memory(&chip8->memory);
   initialize_display(&chip8->display);
+  initialize_input(&chip8->input);
 }
 
 void emulate_cycle(chip8* chip8)
@@ -21,6 +22,7 @@ void emulate_cycle(chip8* chip8)
   cpu* cpu = &chip8->cpu;
   memory* memory = &chip8->memory;
   display* display = &chip8->display;
+  input* input = &chip8->input;
 
   // Get opcode from RAM
   uint16_t opcode = (memory->RAM[cpu->PC] << 8) | (memory->RAM[cpu->PC + 1]);
@@ -239,14 +241,16 @@ void emulate_cycle(chip8* chip8)
         }
         case 0x0055://0xFx55 : LD [I], Vx
         {
-          for(int i = 0; i < GP_REGISTER_COUNT; i++)
+          uint8_t index = (opcode & 0x0F00) >> 8;
+          for(int i = 0; i < index; i++)
           {
             memory->RAM[cpu->I + i] = cpu->V[i];
           }
         }
         case 0x0065://0xFx65 : LD Vx, [I]
         {
-          for(int i = 0; i < GP_REGISTER_COUNT; i++)
+          uint8_t index = (opcode & 0x0F00) >> 8;
+          for(int i = 0; i < index; i++)
           {
             cpu->V[i] =  memory->RAM[cpu->I + i];
           }
@@ -265,7 +269,7 @@ void emulate_cycle(chip8* chip8)
   {
     if(1 == cpu->sound_timer)
     {
-      printf("BEEP\n");
+      //TODO sound implementation
     }
     --cpu->sound_timer;
   }
