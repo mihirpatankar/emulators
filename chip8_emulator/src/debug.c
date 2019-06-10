@@ -86,14 +86,8 @@ static void display_dump(FILE* f, display* display)
   fprintf(f, "Display Dump\n");
   fprintf(f, HEADER_END);
 
-  for(int i = 0; i < DEFAULT_DISPLAY_HEIGHT; i++)
-  {
-    fprintf(f, "\n");
-    for(int j = 0; j < DEFAULT_DISPLAY_WIDTH; j++)
-    {
-      fprintf(f, "%d ", display->display_matrix[i][j]);
-    }
-  }
+  //TODO reimplement display dump
+
   fprintf(f, SECTION_END);
 }
 

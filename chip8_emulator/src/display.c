@@ -20,15 +20,13 @@ void initialize_display(display* display)
 {
   display->draw_flag = DRAW_FLAG_INIT;
   display->window = NULL;
-  display->screen_surface = NULL;
+  display->renderer = NULL;
+  display->texture = NULL;
 
   // Initialize display matrix
-  for(int i = 0; i < DEFAULT_DISPLAY_HEIGHT; i++)
+  for(int i = 0; i < DISPLAY_MAT_SIZE; i++)
   {
-    for(int j = 0; j < DEFAULT_DISPLAY_WIDTH; j++)
-    {
-      display->display_matrix[i][j] = DISPLAY_MAT_INIT;
-    }
+    display->display_matrix[i] = DISPLAY_MAT_INIT;
   }
 
   //Initialize SDL
@@ -49,7 +47,32 @@ void initialize_display(display* display)
     else
     {
       //Get window surface
-      display->screen_surface = SDL_GetWindowSurface(display->window);
+      display->renderer = SDL_CreateRenderer(display->window, -1, 0);
+      SDL_RenderSetLogicalSize(display->renderer, MAPPED_DISPLAY_WIDTH,
+          MAPPED_DISPLAY_HEIGHT);
+      display->texture = SDL_CreateTexture(display->renderer,
+          SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING,
+          DEFAULT_DISPLAY_WIDTH, DEFAULT_DISPLAY_HEIGHT);
     }
+  }
+}
+
+void update_display(display* display)
+{
+  uint8_t pixels[DISPLAY_MAT_SIZE];
+  if(display->draw_flag)
+  {
+    display->draw_flag = false;
+    for(int i = 0; i < DISPLAY_MAT_SIZE; i++)
+    {
+        pixels[i] = display->display_matrix[i];
+    }
+
+    SDL_UpdateTexture(display->texture, NULL, pixels,
+        DEFAULT_DISPLAY_WIDTH * sizeof(uint32_t));
+    // Clear screen and render
+    SDL_RenderClear(display->renderer);
+    SDL_RenderCopy(display->renderer, display->texture, NULL, NULL);
+    SDL_RenderPresent(display->renderer);
   }
 }

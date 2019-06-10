@@ -12,7 +12,8 @@
  =============================================================================*/
 
 #define LOAD_PROGRAM_OFFSET 0x200
-
+#define DEBUG_DELAY 1 // 1Hz
+#define CHIP8_DELAY 0.001 // 100Hz
 /*==============================================================================
  Public data
  =============================================================================*/
@@ -109,12 +110,37 @@ int main(int argc, char** argv)
   // Load program into memory
   load_program(file_handle, &chip8.memory);
 
-  //Debug state
+  while(true)
+  {
+    // emulate cycle
+    emulate_cycle(&chip8);
+
+    // process inputs
+    process_input(&chip8.input);
+
+    // update display
+    update_display(&chip8.display);
+
+    if(debug)
+    {
+      sleep(DEBUG_DELAY);
+    }
+    else
+    {
+      sleep(CHIP8_DELAY);
+    }
+  }
+  // process keyboard input
+
+  // emulate cycle
+
+  // Debug state
   if(debug)
   {
     debug_state(&chip8);
   }
 
+  // delay (60Hz)
 
   printf("Chip8 emulation COMPLETE\n");
   return rc;

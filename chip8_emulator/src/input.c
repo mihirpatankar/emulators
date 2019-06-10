@@ -12,7 +12,7 @@
 // 4 5 6 D   --->   q w e r
 // 7 8 9 E   --->   a s d f
 // A 0 B F   --->   z x c v
-static uint8_t keymap[16] = {
+static uint8_t keymap[KEY_INPUT_COUNT] = {
     SDLK_x,
     SDLK_1,
     SDLK_2,
@@ -66,6 +66,7 @@ void process_input(input* input)
           if(event.key.keysym.sym == keymap[i])
           {
             input->keys[i] = 1;
+            printf("Key down event : %d\n", i);
           }
         }
       }
@@ -78,6 +79,7 @@ void process_input(input* input)
           if(event.key.keysym.sym == keymap[i])
           {
             input->keys[i] = 0;
+            printf("Key up event : %d\n", i);
           }
         }
       }
