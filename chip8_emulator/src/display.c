@@ -68,10 +68,12 @@ void update_display(display* display)
         pixels[i] = display->display_matrix[i];
     }
 
-    SDL_UpdateTexture(display->texture, NULL, pixels,
-        DEFAULT_DISPLAY_WIDTH * sizeof(uint32_t));
     // Clear screen and render
     SDL_RenderClear(display->renderer);
+
+    SDL_UpdateTexture(display->texture, NULL, pixels,
+        DEFAULT_DISPLAY_WIDTH * sizeof(uint32_t));
+
     SDL_RenderCopy(display->renderer, display->texture, NULL, NULL);
     SDL_RenderPresent(display->renderer);
   }

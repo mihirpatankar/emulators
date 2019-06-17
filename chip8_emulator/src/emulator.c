@@ -18,7 +18,7 @@ void init(chip8* chip8)
 
 void emulate_cycle(chip8* chip8)
 {
-  // Get pointers to cpu, memory and display
+  // Get pointers
   cpu* cpu = &chip8->cpu;
   memory* memory = &chip8->memory;
   display* display = &chip8->display;
@@ -364,6 +364,7 @@ void emulate_cycle(chip8* chip8)
   {
     if(1 == cpu->sound_timer)
     {
+      printf("Sound timer : BEEP\n");
       //TODO sound implementation
     }
     --cpu->sound_timer;
