@@ -86,7 +86,52 @@ int main(int argc, char** argv) {
 
     uint8_t i = 0, ret_val = FAILURE;
 
-    while(i < TESTS) {
+    // uint8_t *start = memory_init();
+    // uint8_t test_byte;
+    // uint16_t test_word, test_addr;
+    
+    // test_byte = 0xAA;
+    // test_word = 0x5566;
+    // test_addr = 0x1234;
+
+    // printf("Before write, [0x%x] = 0x%x\n",test_addr, read_byte(test_addr)); 
+    // write_byte(test_addr, test_byte);
+    // printf("After write, [0x%x] = 0x%x\n", test_addr, read_byte(test_addr));
+
+    // printf("Before write, [0x%x] = 0x%x\n",test_addr+5, read_word(test_addr+5)); 
+    // write_word(test_addr+5, test_word);
+    // printf("After write, [0x%x] = 0x%x\n", test_addr+5, read_word(test_addr+5));
+    // printf("[0x%x] = 0x%x\n[0x%x] = 0x%x\n", test_addr+5, read_byte(test_addr+5), test_addr+6, read_byte(test_addr+6));
+
+/*
+ *  Testing Condition reg bit magic
+ *  
+ *  condition_reg c;
+    c.f_reg = 0x00;
+
+    printf("0x00\nC_F:%u U_F:%u P_F:%u U_F:%u A_F:%u U_F:%u Z_F:%u S_F:%u\n", c.c_bit.carry_flag, \
+            c.c_bit.undef_bit1, c.c_bit.parity_flag, c.c_bit.undef_bit3, c.c_bit.aux_carry, \
+            c.c_bit.undef_bit5, c.c_bit.zero_flag, c.c_bit.sign_flag);
+
+    c.f_reg = 0x0F;
+
+    printf("0x0F\nC_F:%u U_F:%u P_F:%u U_F:%u A_F:%u U_F:%u Z_F:%u S_F:%u\n", c.c_bit.carry_flag, \
+            c.c_bit.undef_bit1, c.c_bit.parity_flag, c.c_bit.undef_bit3, c.c_bit.aux_carry, \
+            c.c_bit.undef_bit5, c.c_bit.zero_flag, c.c_bit.sign_flag);
+
+    c.f_reg = 0xF0;
+
+    printf("0xF0\nC_F:%u U_F:%u P_F:%u U_F:%u A_F:%u U_F:%u Z_F:%u S_F:%u\n", c.c_bit.carry_flag, \
+            c.c_bit.undef_bit1, c.c_bit.parity_flag, c.c_bit.undef_bit3, c.c_bit.aux_carry, \
+            c.c_bit.undef_bit5, c.c_bit.zero_flag, c.c_bit.sign_flag);
+
+    c.f_reg = 0xFF;
+
+    printf("0xFF\nC_F:%u U_F:%u P_F:%u U_F:%u A_F:%u U_F:%u Z_F:%u S_F:%u\n", c.c_bit.carry_flag, \
+            c.c_bit.undef_bit1, c.c_bit.parity_flag, c.c_bit.undef_bit3, c.c_bit.aux_carry, \
+            c.c_bit.undef_bit5, c.c_bit.zero_flag, c.c_bit.sign_flag);
+*/
+    /* while(i < TESTS) {
         ret_val = run_test(i);   
         if(ret_val == SUCCESS) {
             printf("\n**************%s=>SUCCESS**************\n", test_files[i]); 
@@ -95,6 +140,6 @@ int main(int argc, char** argv) {
         }
 
         i++;
-    }
+    } */
     return SUCCESS;
 }
